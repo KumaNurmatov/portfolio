@@ -4,7 +4,7 @@ const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 // ---------- Плавный скролл (Lenis, как у ArtCraft) ----------
 let lenis = null;
 if (window.Lenis && !reduce) {
-  lenis = new Lenis({ duration: 1.15, easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+  lenis = window.lenis = new Lenis({ duration: 1.15, easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
   const raf = t => { lenis.raf(t); requestAnimationFrame(raf); };
   requestAnimationFrame(raf);
   document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener('click', e => {
@@ -130,7 +130,10 @@ if (cvs) {
     g.globalAlpha = .08; g.fillStyle = '#fff'; for (let y = 0; y < 200; y += 3) g.fillRect(0, y, 320, 1);
     return c;
   });
-  (window.TUNNEL_IMAGES || []).forEach((src, i) => { const im = new Image(); im.onload = () => { tex[i % tex.length] = im; }; im.src = src; });
+  // реальные работы: как только загрузились — летят они, а градиенты остаются запасом
+  const photos = [];
+  (window.TUNNEL_IMAGES || []).forEach(src => { const im = new Image(); im.onload = () => photos.push(im); im.src = src; });
+  const pick = () => photos.length ? photos[Math.random() * photos.length | 0] : tex[Math.random() * tex.length | 0];
 
   let W, H, dpr;
   const resize = () => {
@@ -142,7 +145,7 @@ if (cvs) {
   const spawn = (c, z) => {
     let x, y;
     do { x = (Math.random() * 2 - 1) * 1.5; y = (Math.random() * 2 - 1) * 1.1; } while (Math.abs(x) < .5 && Math.abs(y) < .38);
-    Object.assign(c, { x, y, z: z ?? 3 + Math.random() * .6, t: Math.random() * tex.length | 0, r: (Math.random() - .5) * .12 });
+    Object.assign(c, { x, y, z: z ?? 3 + Math.random() * .6, im: pick(), r: (Math.random() - .5) * .12 });
   };
   const cards = Array.from({ length: 22 }, (_, i) => { const c = {}; spawn(c, .4 + i / 22 * 3); return c; });
   const streaks = Array.from({ length: 90 }, () => ({ a: Math.random() * Math.PI * 2, d: .2 + Math.random(), z: Math.random() * 3 }));
@@ -174,7 +177,8 @@ if (cvs) {
       ctx.save(); ctx.globalAlpha = alpha * .9;
       ctx.translate(x + w / 2, y + h / 2); ctx.rotate(c.r); ctx.translate(-w / 2, -h / 2);
       rr(0, 0, w, h, Math.max(4, w * .03)); ctx.clip();
-      const im = tex[c.t], iw = im.naturalWidth || im.width, ih = im.naturalHeight || im.height, sc = Math.max(w / iw, h / ih);
+      if (photos.length && tex.includes(c.im) && c.z > 2.6) c.im = pick();
+      const im = c.im, iw = im.naturalWidth || im.width, ih = im.naturalHeight || im.height, sc = Math.max(w / iw, h / ih);
       ctx.drawImage(im, (w - iw * sc) / 2, (h - ih * sc) / 2, iw * sc, ih * sc);
       ctx.restore();
       ctx.save(); ctx.globalAlpha = alpha * .35; ctx.strokeStyle = '#f2f1ee';
@@ -188,6 +192,27 @@ if (cvs) {
     if (running && !was && !reduce) { last = performance.now(); requestAnimationFrame(frame); }
   }).observe(cvs);
 }
+
+// ---------- Видео: играют, только когда видны ----------
+const vio = new IntersectionObserver(es => es.forEach(e => {
+  const v = e.target;
+  if (e.isIntersecting) { v.preload = 'auto'; v.play().catch(() => {}); } else v.pause();
+}), { threshold: .25 });
+document.querySelectorAll('video.autovid').forEach(v => vio.observe(v));
+
+// ---------- Лайтбокс для галерей ----------
+const lb = document.createElement('div'); lb.className = 'lb';
+lb.innerHTML = '<button class="lb__close" aria-label="Закрыть">ЗАКРЫТЬ ✕</button><div class="lb__body"></div>';
+document.body.appendChild(lb);
+const lbBody = lb.querySelector('.lb__body');
+const closeLb = () => { lb.classList.remove('is-open'); lbBody.innerHTML = ''; lenis && lenis.start(); };
+lb.addEventListener('click', e => { if (e.target === lb || e.target.closest('.lb__close')) closeLb(); });
+addEventListener('keydown', e => { if (e.key === 'Escape') closeLb(); });
+document.querySelectorAll('.g').forEach(g => g.addEventListener('click', () => {
+  const v = g.querySelector('video'), i = g.querySelector('img');
+  lbBody.innerHTML = v ? `<video src="${v.getAttribute('src')}" controls autoplay playsinline></video>` : `<img src="${i.getAttribute('src')}" alt="">`;
+  lb.classList.add('is-open'); lenis && lenis.stop();
+}));
 
 // ---------- Мобильное меню ----------
 const burger = document.querySelector('.nav__burger'), menu = document.getElementById('menu');

@@ -335,3 +335,47 @@ a.card:hover .card__more{color:var(--accent-2);gap:12px}
   .tick--r{right:calc(var(--pad) - 5px)}
 }
 @media (max-width:1100px) and (min-width:761px){.list{grid-template-columns:1fr 1fr}}
+
+/* ---------- Работы: сетка ---------- */
+.wgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.w{position:relative;display:flex;flex-direction:column}
+.w .media{aspect-ratio:4/5;min-height:0;flex:none}
+.w--wide{grid-column:span 2}
+.w--wide .media{aspect-ratio:auto;flex:1}
+.w .media>*{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 1.2s cubic-bezier(.2,.7,.2,1)}
+.w:hover .media>*{transform:scale(1.04)}
+.w .work__play{top:16px;left:16px;transform:none;height:30px;padding:0 10px;font-size:10px;pointer-events:none}
+.w__meta{display:flex;justify-content:space-between;padding-top:14px;color:var(--fg-3)}
+.w__meta b{color:var(--fg);font-weight:500}
+.w h4{font-family:var(--display);font-weight:700;font-size:22px;margin-top:4px;transition:color .25s}
+.w:hover h4{color:var(--accent-2)}
+
+/* ---------- Клиенты ---------- */
+.clients{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.client{display:grid;place-items:center;text-align:center;min-height:110px;padding:16px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);
+  font-family:var(--display);font-weight:700;font-size:clamp(14px,1.4vw,19px);color:var(--fg-2);transition:color .25s,background .25s}
+.client:hover{color:var(--fg);background:var(--bg-2)}
+
+/* ---------- Галерея на страницах услуг ---------- */
+.gallery{columns:3 280px;column-gap:16px}
+.g{break-inside:avoid;margin-bottom:16px;position:relative;cursor:zoom-in;overflow:hidden;background:#0c0d0f}
+.g img,.g video{display:block;width:100%;height:auto;transition:transform 1s cubic-bezier(.2,.7,.2,1)}
+.g:hover img,.g:hover video{transform:scale(1.03)}
+.g figcaption{display:flex;justify-content:space-between;gap:12px;padding:10px 2px 0;background:var(--bg);color:var(--fg-3);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase}
+.g figcaption b{color:var(--fg);font-weight:500}
+
+/* ---------- Лайтбокс ---------- */
+.lb{position:fixed;inset:0;z-index:200;background:rgba(10,11,13,.94);display:grid;place-items:center;padding:56px 16px 16px;opacity:0;pointer-events:none;transition:opacity .3s}
+.lb.is-open{opacity:1;pointer-events:auto}
+.lb img,.lb video{max-width:min(1400px,100%);max-height:calc(100svh - 90px);object-fit:contain}
+.lb__close{position:absolute;top:12px;right:16px;height:36px;padding:0 14px;border:1px solid var(--line-2);background:none;color:var(--fg);font-family:var(--mono);font-size:11px;letter-spacing:.12em;cursor:pointer}
+.lb__close:hover{background:var(--fg);color:var(--bg)}
+
+@media (max-width:1100px){.clients{grid-template-columns:repeat(4,1fr)}}
+@media (max-width:760px){
+  .wgrid{grid-template-columns:1fr}
+  .w--wide{grid-column:auto}
+  .w--wide .media{aspect-ratio:16/10;flex:none}
+  .clients{grid-template-columns:repeat(2,1fr)}
+  .client{min-height:80px}
+}
