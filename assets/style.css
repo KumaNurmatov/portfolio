@@ -379,3 +379,33 @@ a.card:hover .card__more{color:var(--accent-2);gap:12px}
   .clients{grid-template-columns:repeat(2,1fr)}
   .client{min-height:80px}
 }
+
+/* ---------- Группы в галерее ---------- */
+.g-group{column-span:all;display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;
+  margin:36px 0 18px;padding-top:18px;border-top:1px solid var(--line);font-family:var(--display);font-weight:900;font-size:clamp(26px,3vw,42px);text-transform:uppercase}
+.g-group:first-child{margin-top:0}
+.g-group small{color:var(--fg-3);font-weight:400;text-transform:uppercase}
+
+/* ---------- Витрина сайтов ---------- */
+.sites{display:flex;flex-direction:column;gap:clamp(60px,8vw,110px)}
+.site{display:grid;grid-template-columns:1.45fr 1fr;gap:clamp(24px,4vw,56px);align-items:center}
+.site:nth-child(even) .site__shot{order:2}
+.site__shot{position:relative;padding-bottom:28px}
+.site__browser{display:flex;align-items:center;gap:6px;height:34px;padding:0 12px;background:#1d1f24;border:1px solid var(--line-2);border-bottom:0}
+.site__browser i{width:9px;height:9px;border-radius:50%;background:var(--fg-3)}
+.site__browser span{margin-left:12px;color:var(--fg-3);font-size:10px;letter-spacing:.06em;text-transform:none}
+.site__scroll{position:relative;aspect-ratio:16/10;overflow:hidden;border:1px solid var(--line-2);background:#0c0d0f}
+.site__scroll img{width:100%;height:auto;display:block;transform:translateY(0);transition:transform 6s cubic-bezier(.45,0,.25,1)}
+.site:hover .site__scroll img{transform:translateY(calc(-100% + var(--sh,300px)))}
+.site__phone{position:absolute;right:-14px;bottom:0;width:22%;min-width:90px;border:6px solid #1d1f24;border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.55);background:#000}
+.site__n{color:var(--accent-2)}
+.site__info h3{font-family:var(--display);font-weight:900;text-transform:uppercase;font-size:clamp(28px,3.4vw,48px);line-height:1;margin:14px 0 16px}
+.site__info p{color:var(--fg-2);font-size:16.5px}
+.site__info .tools{margin-top:22px}
+.site__link{display:inline-flex;margin-top:24px;padding:12px 16px;border:1px solid var(--line-2);color:var(--fg);transition:.25s}
+a.site__link:hover{background:var(--fg);color:var(--bg)}
+@media (max-width:900px){
+  .site{grid-template-columns:1fr}
+  .site:nth-child(even) .site__shot{order:0}
+  .site__phone{right:6px;width:26%}
+}

@@ -214,6 +214,10 @@ document.querySelectorAll('.g').forEach(g => g.addEventListener('click', () => {
   lb.classList.add('is-open'); lenis && lenis.stop();
 }));
 
+// ---------- Скриншоты сайтов: высота окна для прокрутки при наведении ----------
+const setSh = () => document.querySelectorAll('.site__scroll').forEach(b => b.style.setProperty('--sh', b.clientHeight + 'px'));
+setSh(); addEventListener('resize', setSh);
+
 // ---------- Мобильное меню ----------
 const burger = document.querySelector('.nav__burger'), menu = document.getElementById('menu');
 if (burger && menu) {

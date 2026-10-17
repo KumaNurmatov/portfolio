@@ -55,8 +55,8 @@ SERVICES = [
                 ("Монтаж и звук", "Сборка генераций в цельный ролик.")],
          tools="Генеративные нейросети · Photoshop · After Effects · Premiere Pro",
          cases=[("ARCHA — «Две тропы»", "ИИ-фильм: барс и всадник, сценарий, 30+ сгенерированных кадров, монтаж"),
-                ("ARCHA", "ИИ-посты «Баатыр» и «Олень», 3D-иконки для актуальных"),
-                ("MBANK", "ИИ-видео для ОСАГО, 3D-визуалы для MIslamic и техработ"),
+                ("ARCHA", "ИИ-посты «Баатыр» и «Олень» для Instagram"),
+                ("MBANK", "ИИ-видео для ОСАГО"),
                 ("Сезонные иллюстрации", "Серия «весна, лето, осень, зима» в акварельной стилистике")]),
     dict(slug="ads", n="04", tag="Performance", title="Креативы для таргета", ph="ph--c",
          tagline="Дизайн, который считают в CPL.",
@@ -68,8 +68,8 @@ SERVICES = [
                 ("Лендинги", "Дизайн и вёрстка посадочных страниц."),
                 ("Анализ", "Смотрю на результаты и предлагаю следующие гипотезы.")],
          tools="Photoshop · Illustrator · After Effects · Битрикс24",
-         cases=[("MBANK", "MIslamic, MPay, MTravel, ипотека, автокредит, бизнес — статика и адаптации"),
-                ("Borsan Group", "Креативы для ЖК Borsan Residence, Brown, Green Line, Ivory, UNO"),
+         cases=[("MBANK", "50+ креативов: MIslamic, MPay, MBusiness, MTravel, ОСАГО, ипотека, автокредит, техработы"),
+                ("Borsan Group", "50+ креативов для ЖК Borsan Residence, Brown, Green Line, Ivory, Loft, UNO, Рассвет"),
                 ("Jetour · SOUEAST", "Акции и рассрочка: таргет, сторис, раздаточные материалы"),
                 ("Pixel", "Креативы для магазина ноутбуков"),
                 ("ADS Lab", "Статика, моушн, сайты в рекламном агентстве")]),
@@ -98,8 +98,7 @@ SERVICES = [
                 ("Презентации", "КП и презентации, в которых читаются цифры."),
                 ("Вёрстка сайтов", "Дизайн и вёрстка простых сайтов.")],
          tools="Illustrator · Photoshop",
-         cases=[("КФУ", "Баннеры и пресс-волл для товарищеских матчей сборной"),
-                ("Теплоход «Алыкул»", "Меню ресторана и бара, баннеры, листовки доставки"),
+         cases=[("Теплоход «Алыкул»", "Меню ресторана и бара, баннеры, листовки доставки"),
                 ("Jetour · SOUEAST", "Брендинг авто винилом, раздаточные материалы"),
                 ("Pixel в ЦУМе", "Оформление магазина и навигация"),
                 ("ARCHA", "Баннеры, роллапы, оформление отдела продаж"),
@@ -119,6 +118,47 @@ SERVICES = [
                 ("Amanat City · Рабат · Fasadmaster", "Ролики с ведущими для застройщиков, монтаж"),
                 ("Теплоход «Алыкул»", "Аэросъёмка с дрона"),
                 ("Trio studio", "Фото, видео, монтаж клипов")]),
+    dict(slug="web", n="08", tag="Web", title="Сайты и веб-сервисы", ph="ph--c",
+         tagline="От лендинга до внутреннего сервиса.",
+         lead="Делаю сайты, которые продают и работают: лендинги жилых комплексов, сайты с ИИ-консультантом, 3D и интерактивными картами, а также внутренние сервисы, которые заменяют хаос в WhatsApp и Excel.",
+         items=[("Лендинги", "Сайты жилых комплексов, бизнес-центров и услуг под заявки."),
+                ("ИИ-консультант", "Встроенный чат-ассистент, который понимает любой язык и помогает выбрать."),
+                ("Интерактив и 3D", "Интерактивные карты окружения, 3D-модели и планировки прямо на сайте."),
+                ("Tilda Zero Block", "Сложная вёрстка на Тильде, которую клиент может править сам."),
+                ("Веб-сервисы", "Дашборды, учёт заказов, бухгалтерия — под процессы бизнеса."),
+                ("Web3 и финтех", "Интерфейсы платформ с обменом фиата и криптовалюты.")],
+         tools="Tilda · HTML/CSS/JS · ИИ-ассистенты · 3D/WebGL · дашборды",
+         cases=[],
+         sites=[
+             dict(img="site-freeways", m="site-freeways-m", name="Freeways", url="https://freeways.kg", label="freeways.kg",
+                  kind="Аренда авто в Бишкеке",
+                  text="Прокат автомобилей от эконом до премиум. Встроенный ИИ-консультант понимает любой язык и помогает подобрать машину под поездку. Фото автомобилей для каталога тоже снимал я.",
+                  tags=["Сайт", "ИИ-консультант", "Мультиязычность", "Каталог"]),
+             dict(img="site-ivory", m="site-ivory-m", name="Ivory · Borsan Group", url="https://borsan.kg/ivory", label="borsan.kg/ivory",
+                  kind="Лендинг ЖК премиум-класса",
+                  text="Сайт жилого комплекса Ivory. По просьбе клиента добавлена интерактивная карта: объекты рядом и расположение можно «потыкать» прямо на странице.",
+                  tags=["Лендинг", "Интерактивная карта", "Девелопер"]),
+             dict(img="site-archa", m="site-archa-m", name="ARCHA", url="https://archaissykul.kg", label="archaissykul.kg",
+                  kind="Апарт-отель на Иссык-Куле, с. Бостери",
+                  text="Сайт апарт-отеля с презентацией, планировками и условиями покупки. Встроен 3D-объект: сайт готов показывать 3D-планировки и любые 3D-материалы проекта.",
+                  tags=["Сайт", "3D", "Админка", "Девелопер"]),
+             dict(img="site-buran", m=None, name="BURAN · PAX Group", url="https://pax-group.tilda.ws/", label="pax-group.tilda.ws",
+                  kind="Бизнес-центр класса A+ в центре Бишкека",
+                  text="Сайт бизнес-центра с инвестиционным предложением и 3D-планировками офисов. Проект на стадии финиша.",
+                  tags=["Tilda", "Zero Block", "3D-планировки", "В работе"]),
+             dict(img="site-magistral", m="site-magistral-m", name="Магистраль · PAX Group", url="https://pax-group.tilda.ws/magistral", label="pax-group.tilda.ws/magistral",
+                  kind="Многопрофильный бизнес-центр",
+                  text="Лендинг коммерческих помещений на первой линии для сферы услуг, кафе и ресторанов. Проект на стадии финиша.",
+                  tags=["Tilda", "Лендинг", "Коммерция", "В работе"]),
+             dict(img="site-agrofi", m="site-agrofi-m", name="AgroFi", url="https://agrofi.asia", label="agrofi.asia",
+                  kind="Инвестиции в урожай на блокчейне",
+                  text="Платформа, где инвесторы финансируют реальных фермеров, а блокчейн гарантирует прозрачность. Внутри — сервис обмена реальных денег на криптовалюту.",
+                  tags=["Web3", "Финтех", "Обмен фиат ↔ крипто", "Калькулятор"]),
+             dict(img="site-sewing", m=None, name="Учёт заказов", url=None, label="внутренний сервис",
+                  kind="Швейное производство, работа с Россией",
+                  text="Инструмент учёта заказов и бухгалтерии перевозок. Видно, на какой ступени каждый заказ: предоплата → пошив → отгрузка → приёмка → постоплата → сверка. Список дел, разбивка по месяцам, крупные долги и замечания по документам. Раньше всё велось в WhatsApp и Excel.",
+                  tags=["Веб-сервис", "Дашборд", "Учёт", "Бухгалтерия"]),
+         ]),
 ]
 
 # Галереи: (файл, подпись, клиент). .mp4 — видео из media/video, остальное — media/img/*.jpg
@@ -130,24 +170,116 @@ GALLERY = {
     "motion": [("archa-motion.mp4", "Моушн-пост", "ARCHA"), ("jetour-x50.mp4", "Таргет", "Jetour X50"), ("archa-led.mp4", "LED-экран", "ARCHA"),
                ("alykul-beishe.mp4", "Афиша", "Теплоход «Алыкул»"), ("soueast-motion.mp4", "Таргет", "SOUEAST"), ("mbank-islamic.mp4", "Преролл", "MBANK"),
                ("alykul-motion.mp4", "Афиша", "Теплоход «Алыкул»"), ("marjan.mp4", "Тизер показа", "Marjan de la Mode")],
-    "ai": [("archa-film.mp4", "ИИ-фильм «Две тропы»", "ARCHA"), ("mbank-osago.mp4", "ИИ-видео", "MBANK"), ("mbank-gear", "3D-визуал", "MBANK"),
-           ("archa-hl-faq", "3D-иконка", "ARCHA"), ("archa-hl-people", "3D-иконка", "ARCHA"), ("ai-autumn", "Осень", "Сезонная серия"),
+    "ai": [("archa-film.mp4", "ИИ-фильм «Две тропы»", "ARCHA"), ("mbank-osago.mp4", "ИИ-видео", "MBANK"), ("ai-autumn", "Осень", "Сезонная серия"),
            ("ai-winter", "Зима", "Сезонная серия"), ("ai-spring", "Весна", "Сезонная серия"), ("ai-summer", "Лето", "Сезонная серия"),
-           ("mbank-cashback", "3D-визуал", "MBANK")],
-    "ads": [("mbank-islamic", "Кешбэк", "MBANK"), ("soueast-s09", "Рассрочка", "SOUEAST S09"), ("greenline-park", "Рассрочка", "Borsan · Green Line"),
-            ("mbank-business", "Visa to account", "MBANK"), ("jetour-t2", "Акция", "Jetour T2"), ("brown-zero", "0% взноса", "Borsan · Brown"),
-            ("mbank-nfc", "NFC-стикер", "MBANK"), ("soueast-nobank", "Без банка", "SOUEAST"), ("mbank-refund", "Возврат средств", "MBANK"),
-            ("borsan-residence", "Квартира", "Borsan Residence"), ("mbank-tint", "Тонировка", "MBANK"), ("soueast-s07", "S07", "SOUEAST"),
-            ("ivory-poster", "Старт продаж", "Borsan · Ivory"), ("mbank-mortgage", "Ипотека", "MBANK"), ("soueast-s09-orange", "S09", "SOUEAST"),
-            ("loft-poster", "Loft", "Borsan · Ivory"), ("mbank-adal", "АДАЛ 0-0-4", "MBANK"), ("pixel-laptops", "Ноутбуки", "Pixel"),
-            ("mbank-autocredit", "Автокредит", "MBANK"), ("brown-30", "Рассрочка", "Borsan · Brown"), ("mbank-bizpause", "Бизнес без паузы", "MBANK")],
+           ],
+    "ads": [("#", "MBANK", "50+ креативов: MTravel, MPay, MBusiness, MIslamic, кредиты, ипотека"),
+            ("mbank-islamic", "MIslamic · Рамазан", "MBANK"), ("mbank-business", "Visa to account", "MBANK"), ("mbank-nfc", "NFC-стикер", "MBANK"),
+            ("mbank-refund", "Возврат средств", "MBANK"), ("mbank-tint", "Тонировка", "MBANK"), ("mbank-mortgage", "Ипотека", "MBANK"),
+            ("mbank-adal", "АДАЛ 0-0-4", "MBANK"), ("mbank-autocredit", "Автокредит", "MBANK"), ("mbank-bizpause", "Бизнес без паузы", "MBANK"),
+            ("mbank-mtravel", "MTravel", "MBANK"),
+            ("mb-01", "MTravel", "MBANK"),
+            ("mb-02", "MTravel", "MBANK"),
+            ("mb-03", "MTravel", "MBANK"),
+            ("mb-04", "MPay · MBusiness", "MBANK"),
+            ("mb-05", "MPay · MBusiness", "MBANK"),
+            ("mb-06", "MPay · MBusiness", "MBANK"),
+            ("mb-07", "MPay · MBusiness", "MBANK"),
+            ("mb-08", "MPay · MBusiness", "MBANK"),
+            ("mb-09", "ОСАГО", "MBANK"),
+            ("mb-10", "ОСАГО", "MBANK"),
+            ("mb-11", "Обновление", "MBANK"),
+            ("mb-12", "Тонировка онлайн", "MBANK"),
+            ("mb-13", "Тонировка онлайн", "MBANK"),
+            ("mb-14", "Тонировка онлайн", "MBANK"),
+            ("mb-15", "Возврат средств", "MBANK"),
+            ("mb-16", "Возврат средств", "MBANK"),
+            ("mb-17", "Переводы в Турцию", "MBANK"),
+            ("mb-18", "Техработы", "MBANK"),
+            ("mb-19", "MPay кешбэк", "MBANK"),
+            ("mb-20", "MPay кешбэк", "MBANK"),
+            ("mb-21", "MPay кешбэк", "MBANK"),
+            ("mb-22", "MBusiness · Visa", "MBANK"),
+            ("mb-23", "MBusiness · Visa", "MBANK"),
+            ("mb-24", "Приглашение", "MBANK"),
+            ("mb-25", "Приглашение", "MBANK"),
+            ("mb-26", "Онлайн-кредит · ипотека", "MBANK"),
+            ("mb-27", "Онлайн-кредит · ипотека", "MBANK"),
+            ("mb-28", "Мурабаха", "MBANK"),
+            ("mb-29", "MIslamic · Рамазан", "MBANK"),
+            ("mb-30", "MIslamic · Рамазан", "MBANK"),
+            ("mb-31", "MIslamic · карта", "MBANK"),
+            ("mb-32", "MIslamic · карта", "MBANK"),
+            ("mb-33", "MIslamic · кешбэк", "MBANK"),
+            ("mb-34", "MIslamic · кешбэк", "MBANK"),
+            ("mb-35", "Мурабаха", "MBANK"),
+            ("mb-36", "Автокредит", "MBANK"),
+            ("mb-37", "Автокредит", "MBANK"),
+            ("mb-38", "Бизнес без паузы", "MBANK"),
+            ("mb-39", "Бизнес без паузы", "MBANK"),
+            ("mb-40", "Кредитный потенциал", "MBANK"),
+            ("mb-41", "Онлайн-ипотека", "MBANK"),
+            ("mb-42", "Онлайн-ипотека", "MBANK"),
+            ("mb-43", "Онлайн-ипотека", "MBANK"),
+            ("#", "Borsan Group", "Borsan Residence, Brown, Green Line, Ivory, Loft, UNO, Рассвет"),
+            ("greenline-park", "Green Line", "Borsan Group"), ("brown-zero", "Brown", "Borsan Group"), ("borsan-residence", "Borsan Residence", "Borsan Group"),
+            ("ivory-poster", "Ivory", "Borsan Group"), ("loft-poster", "Loft", "Borsan Group"), ("brown-30", "Brown", "Borsan Group"),
+            ("uno-lake", "UNO", "Borsan Group"), ("borsan-gold", "Borsan Residence", "Borsan Group"), ("greenline-2k", "Green Line", "Borsan Group"),
+            ("bs-01", "Borsan Residence", "Borsan Group"),
+            ("bs-02", "Borsan Residence", "Borsan Group"),
+            ("bs-03", "Borsan Residence", "Borsan Group"),
+            ("bs-04", "Borsan Residence", "Borsan Group"),
+            ("bs-05", "Borsan Residence", "Borsan Group"),
+            ("bs-06", "Brown", "Borsan Group"),
+            ("bs-07", "Brown", "Borsan Group"),
+            ("bs-08", "Brown", "Borsan Group"),
+            ("bs-09", "Brown", "Borsan Group"),
+            ("bs-10", "Brown", "Borsan Group"),
+            ("bs-11", "Brown", "Borsan Group"),
+            ("bs-12", "Brown", "Borsan Group"),
+            ("bs-13", "Brown", "Borsan Group"),
+            ("bs-14", "Рассвет", "Borsan Group"),
+            ("bs-15", "Green Line", "Borsan Group"),
+            ("bs-16", "Green Line", "Borsan Group"),
+            ("bs-17", "Green Line", "Borsan Group"),
+            ("bs-18", "Green Line", "Borsan Group"),
+            ("bs-19", "UNO", "Borsan Group"),
+            ("bs-20", "UNO", "Borsan Group"),
+            ("bs-21", "UNO", "Borsan Group"),
+            ("bs-22", "UNO", "Borsan Group"),
+            ("bs-23", "UNO", "Borsan Group"),
+            ("bs-24", "UNO", "Borsan Group"),
+            ("bs-25", "Borsan Residence", "Borsan Group"),
+            ("bs-26", "Borsan Residence", "Borsan Group"),
+            ("bs-27", "Borsan Residence", "Borsan Group"),
+            ("bs-28", "Brown", "Borsan Group"),
+            ("bs-29", "Green Line", "Borsan Group"),
+            ("bs-30", "Green Line", "Borsan Group"),
+            ("bs-31", "Green Line", "Borsan Group"),
+            ("bs-32", "Ivory · Loft", "Borsan Group"),
+            ("bs-33", "Ivory · Loft", "Borsan Group"),
+            ("bs-34", "Ivory · Loft", "Borsan Group"),
+            ("bs-35", "Ivory · Loft", "Borsan Group"),
+            ("bs-36", "Ivory · Loft", "Borsan Group"),
+            ("bs-37", "Ivory · Loft", "Borsan Group"),
+            ("bs-38", "UNO", "Borsan Group"),
+            ("bs-39", "UNO", "Borsan Group"),
+            ("bs-40", "Borsan Group", "Borsan Group"),
+            ("bs-41", "Borsan Group", "Borsan Group"),
+            ("bs-42", "Borsan Group", "Borsan Group"),
+            ("bs-43", "Borsan Group", "Borsan Group"),
+            ("bs-44", "Borsan Group", "Borsan Group"),
+            ("bs-45", "Borsan Group", "Borsan Group"),
+            ("#", "Jetour · SOUEAST · Pixel", "Автодилер и магазин техники"),
+            ("soueast-s09", "S09", "SOUEAST"), ("jetour-t2", "T2", "Jetour"), ("soueast-nobank", "Без банка", "SOUEAST"),
+            ("soueast-s07", "S07", "SOUEAST"), ("soueast-s09-orange", "S09", "SOUEAST"), ("soueast-s07-orange", "S07", "SOUEAST"),
+            ("pixel-laptops", "Ноутбуки", "Pixel")],
     "smm": [("archa-investor", "Пост", "ARCHA"), ("archa-story-1", "Сторис", "ARCHA"), ("archa-story-4", "Сторис", "ARCHA"),
-            ("archa-hl-people", "Актуальные", "ARCHA"), ("brown-plan", "Планировка", "Borsan · Brown"), ("ivory-service", "Сервис", "Borsan · Ivory"),
+            ("brown-plan", "Планировка", "Borsan · Brown"), ("ivory-service", "Сервис", "Borsan · Ivory"),
             ("ivory-terrace", "Каталог", "Borsan · Ivory"), ("kulikov-xmas", "Сторис", "Kulikov"), ("mbank-mtravel", "Сторис", "MBANK · MTravel"),
-            ("brown-premium", "Пост", "Borsan · Brown"), ("uno-lake", "Пост", "Borsan · UNO"), ("borsan-gold", "Пост", "Borsan Residence")],
-    "print": [("alykul-menu-company", "Меню", "Теплоход «Алыкул»"), ("kfu-team", "Баннер 2.2×2.2 м", "КФУ"), ("alykul-menu-breakfast", "Меню", "Теплоход «Алыкул»"),
-              ("kfu-friendly", "Баннер", "КФУ"), ("alykul-menu-croissant", "Меню", "Теплоход «Алыкул»"), ("kfu-flags", "Баннер", "КФУ"),
-              ("alykul-menu-mains", "Меню", "Теплоход «Алыкул»"), ("jetour-t2-flyer", "Раздатка", "Jetour T2"), ("archa-banner", "Баннер", "ARCHA"),
+            ("brown-premium", "Пост", "Borsan · Brown"), ("uno-lake", "Пост", "Borsan · UNO"), ("borsan-gold", "Пост", "Borsan Residence"), ("mb-24", "Приглашение", "MBANK"), ("mb-18", "Техработы", "MBANK"), ("bs-44", "Пост", "Borsan Group"), ("mb-02", "MTravel", "MBANK")],
+    "print": [("alykul-menu-company", "Меню", "Теплоход «Алыкул»"), ("alykul-menu-breakfast", "Меню", "Теплоход «Алыкул»"),
+              ("alykul-menu-croissant", "Меню", "Теплоход «Алыкул»"), ("alykul-menu-mains", "Меню", "Теплоход «Алыкул»"), ("jetour-t2-flyer", "Раздатка", "Jetour T2"), ("archa-banner", "Баннер", "ARCHA"),
               ("pixel-store", "Оформление магазина", "Pixel · ЦУМ"), ("aiylbank-box", "Упаковка", "Айыл Банк"), ("uno-issykkul", "Наружка", "Borsan · UNO")],
     "photo-video": [("freeways-gls", "Фото для сайта", "Freeways"), ("florodora-2", "Предметка", "Florodora"), ("suyun-rabat.mp4", "Ролик с ведущим", "Рабат"),
                     ("freeways-x5-city", "Фото", "Freeways"), ("florodora-3", "Бьюти", "Florodora"), ("alykul-ship", "Аэросъёмка", "Теплоход «Алыкул»"),
@@ -157,11 +289,41 @@ GALLERY = {
 }
 
 
+def sites_block(sites):
+    out = []
+    for i, x in enumerate(sites):
+        link = (f'<a class="site__link mono" href="{x["url"]}" target="_blank" rel="noopener">{x["label"]} ↗</a>' if x["url"]
+                else f'<span class="site__link mono">{x["label"]}</span>')
+        mob = f'<img class="site__phone" src="../media/img/{x["m"]}.jpg" alt="" loading="lazy">' if x["m"] else ""
+        tags = "".join(f"<span>{t}</span>" for t in x["tags"])
+        out.append(f'''      <article class="site rv">
+        <div class="site__shot">
+          <div class="site__browser"><i></i><i></i><i></i><span class="mono">{x["label"]}</span></div>
+          <div class="site__scroll"><img src="../media/img/{x["img"]}-tall.jpg" onerror="this.src='../media/img/{x["img"]}.jpg'" alt="{x["name"]}" loading="lazy"></div>
+          {mob}
+        </div>
+        <div class="site__info">
+          <span class="mono site__n">{i + 1:02d} · {x["kind"]}</span>
+          <h3>{x["name"]}</h3>
+          <p>{x["text"]}</p>
+          <div class="tools">{tags}</div>
+          {link}
+        </div>
+      </article>''')
+    return "\n".join(out)
+
+
 def media(name, cls=""):
     if name.endswith(".mp4"):
         b = name[:-4]
         return f'<video class="autovid {cls}" src="../media/video/{name}" poster="../media/video/{b}.jpg" muted loop playsinline preload="none"></video>'
-    return f'<img class="{cls}" src="../media/img/{name}.jpg" alt="" loading="lazy">'
+    try:
+        from PIL import Image
+        w, h = Image.open(ROOT / "media" / "img" / f"{name}.jpg").size
+        wh = f' width="{w}" height="{h}"'
+    except Exception:
+        wh = ""
+    return f'<img class="{cls}" src="../media/img/{name}.jpg"{wh} alt="" loading="lazy">'
 
 
 ARROW = '<svg viewBox="0 0 16 16" fill="none"><path d="M2 8h11M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5"/></svg>'
@@ -182,9 +344,13 @@ def page(s, nxt):
         for i, (t, d) in enumerate(STEPS))
     gal = GALLERY.get(s["slug"], [])
     gallery = "\n".join(
-        f'      <figure class="g rv">{media(f)}<figcaption><b>{c}</b><span>{t}</span></figcaption></figure>'
+        (f'      <h3 class="g-group" id="{t.split()[0].lower()}"><span>{t}</span><small class="mono">{c}</small></h3>' if f == "#" else
+         f'      <figure class="g rv">{media(f)}<figcaption><b>{c}</b><span>{t}</span></figcaption></figure>')
         for f, t, c in gal)
-    hero_media = media(gal[0][0]) if gal else f'<div class="ph {s["ph"]}"></div>'
+    works_inner = (f'    <div class="sites">\n{sites_block(s["sites"])}\n    </div>' if s.get("sites")
+                   else f'    <div class="gallery">\n{gallery}\n    </div>')
+    first = next((f for f, _, _ in gal if f != "#"), None)
+    hero_media = media(first) if first else f'<div class="ph {s["ph"]}"></div>'
     cases = "\n".join(
         f'      <div class="exp__row rv"><span class="mono">клиент {i + 1:02d}</span><h4>{t}</h4><p>{d}</p>{DIAG}</div>'
         for i, (t, d) in enumerate(s["cases"]))
@@ -254,11 +420,9 @@ def page(s, nxt):
     <div class="eyebrow mono"><b>A</b>/ Работы</div>
     <div class="head">
       <h2 class="h2 rv">Избранные<br><em>работы.</em></h2>
-      <p class="rv">Нажмите на работу, чтобы открыть её крупно.</p>
+      <p class="rv">{"Наведите на скриншот — страница прокрутится. Ссылки ведут на живые сайты." if s.get("sites") else "Нажмите на работу, чтобы открыть её крупно."}</p>
     </div>
-    <div class="gallery">
-{gallery}
-    </div>
+{works_inner}
   </div>
 </section>
 
