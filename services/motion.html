@@ -37,7 +37,7 @@
   <a href="#contact">Контакт</a>
 </div>
 
-<div class="ruler" aria-hidden="true"><div class="ruler__scale" id="rulerScale"><div class="ruler__mark"></div></div></div>
+<div class="ruler" id="ruler" role="scrollbar" aria-label="Положение на странице" aria-orientation="vertical" aria-valuemin="0" aria-valuemax="1337" aria-valuenow="0"><div class="ruler__bg"></div><div class="ruler__scale"><div class="ruler__band"></div><div class="ruler__ptr"></div></div></div>
 
 <main id="top">
 <section class="s-hero section">
@@ -59,7 +59,7 @@
 
 <section class="section">
   <div class="wrap">
-    <div class="eyebrow mono"><b>A</b>/ Работы</div>
+    <div class="eyebrow mono" data-ruler="Работы"><b>A</b>/ Работы</div>
     <div class="head">
       <h2 class="h2 rv">Избранные<br><em>работы.</em></h2>
       <p class="rv">Нажмите на работу, чтобы открыть её крупно.</p>
@@ -79,7 +79,7 @@
 
 <section class="section">
   <div class="wrap">
-    <div class="eyebrow mono"><b>B</b>/ Что входит</div>
+    <div class="eyebrow mono" data-ruler="Что входит"><b>B</b>/ Что входит</div>
     <div class="head">
       <h2 class="h2 rv">Что я<br><em>делаю.</em></h2>
       <p class="rv">Можно взять услугу целиком или отдельные пункты — соберу под задачу и бюджет.</p>
@@ -97,7 +97,7 @@
 
 <section class="section">
   <div class="wrap">
-    <div class="eyebrow mono"><b>C</b>/ Как работаю</div>
+    <div class="eyebrow mono" data-ruler="Процесс"><b>C</b>/ Как работаю</div>
     <div class="head">
       <h2 class="h2 rv">Четыре шага<br><em>до результата.</em></h2>
       <p class="rv">Прозрачно на каждом этапе: вы видите промежуточные версии, а не только финал.</p>
@@ -134,7 +134,7 @@
   <span class="next__arrow"><svg viewBox="0 0 16 16" fill="none"><path d="M2 8h11M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5"/></svg></span>
 </a>
 
-<section class="cta" id="contact">
+<section class="cta" id="contact" data-ruler="Контакт">
   <div class="hero__glow"></div>
   <div class="wrap">
     <div class="mono rv" style="color:var(--fg-3);margin-bottom:28px;position:relative">Бишкек · офис или гибрид · командировки</div>

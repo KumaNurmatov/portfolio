@@ -88,17 +88,6 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:100;op
 .hero__index a:hover{color:var(--fg)}
 .hero__corner{position:absolute;left:var(--pad);bottom:28px;color:var(--fg-3)}
 
-/* линейка прокрутки справа: 0–1337 мм */
-.ruler{position:fixed;right:0;top:56px;bottom:0;width:38px;border-left:1px solid var(--line);background:rgba(18,19,22,.55);z-index:40;pointer-events:none}
-.ruler__scale{position:absolute;inset:10px 0}
-.ruler__t{position:absolute;right:0;height:1px;width:5px;background:var(--line-2)}
-.ruler__t--m{width:9px}
-.ruler__t--l{width:14px;background:var(--fg-3)}
-.ruler__n{position:absolute;right:17px;transform:translateY(-50%);font-family:var(--mono);font-size:8px;letter-spacing:.02em;color:var(--fg-3)}
-.ruler__mark{position:absolute;right:0;left:-1px;height:1px;background:var(--accent-2);box-shadow:0 0 8px var(--accent)}
-.ruler__mark::after{content:"";position:absolute;left:-6px;top:-4px;border:4px solid transparent;border-left:6px solid var(--accent-2)}
-.ruler__mark::before{content:attr(data-mm) " мм";position:absolute;right:46px;top:-9px;padding:2px 6px;background:var(--accent);color:#fff;font-family:var(--mono);font-size:10px;letter-spacing:.06em;white-space:nowrap}
-
 /* ---------- MARQUEE ---------- */
 .marquee{border-block:1px solid var(--line);overflow:hidden;padding:18px 0;background:var(--bg-2)}
 .marquee__track{display:flex;width:max-content;animation:marquee 40s linear infinite}
@@ -229,7 +218,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:100;op
 @media (max-width:760px){
   .nav__item,.nav__cta{display:none}
   .nav__burger{display:block}
-  .ruler,.hero__index{display:none}
+  .ruler{display:none}
   .head{grid-template-columns:1fr;gap:18px;margin-bottom:36px}
   .grid,.trio,.works,.works--two{grid-template-columns:1fr}
   .card--wide{grid-column:auto}
@@ -276,13 +265,6 @@ html.lenis,html.lenis body{height:auto}
 .section.line-in .tick{opacity:1;transform:none}
 .eyebrow::after{transform:scaleX(0);transform-origin:left;transition:transform 1.2s .2s cubic-bezier(.7,0,.2,1)}
 .eyebrow.in::after{transform:scaleX(1)}
-
-/* линейка: цифры прокручиваются как на счётчике */
-.ruler__mark::before{content:none}
-.ruler__read{position:absolute;right:46px;top:-9px;display:flex;align-items:center;gap:4px;padding:2px 6px;background:var(--accent);color:#fff;font-family:var(--mono);font-size:10px;line-height:14px;letter-spacing:.04em;white-space:nowrap}
-.odo{display:flex;height:14px;overflow:hidden}
-.odo__col{display:flex;flex-direction:column;transition:transform .28s cubic-bezier(.2,.9,.2,1)}
-.odo__col span{height:14px;display:block;text-align:center;width:.62em}
 
 /* карточки услуг — ссылки */
 a.card{cursor:pointer}
@@ -414,3 +396,36 @@ a.site__link:hover{background:var(--fg);color:var(--bg)}
 .hero__sub,.hero__lead,.hero__kicker{text-shadow:0 1px 2px rgba(18,19,22,.9),0 0 18px rgba(18,19,22,.95),0 0 40px rgba(18,19,22,.8)}
 .hero__lead{color:rgba(242,241,238,.82)}
 .hero__btns .btn:not(.btn--solid){background:rgba(18,19,22,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+
+/* ================================================================
+   ЛИНЕЙКА-СКРОЛЛБАР (как у ArtCraft), 0–1337 мм
+   ================================================================ */
+html{scrollbar-width:none}
+html::-webkit-scrollbar,body::-webkit-scrollbar{display:none;width:0;height:0}
+.ruler{position:fixed;top:0;right:0;bottom:0;width:60px;z-index:45;cursor:crosshair;user-select:none;-webkit-user-select:none;touch-action:none}
+.ruler__bg{position:absolute;inset:0;backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);background:rgba(18,19,22,.55);
+  mask-image:linear-gradient(to left,#000 40%,rgba(0,0,0,.5) 60%,transparent);-webkit-mask-image:linear-gradient(to left,#000 40%,rgba(0,0,0,.5) 60%,transparent)}
+.ruler__scale{position:absolute;left:0;right:0;top:72px;bottom:18px}
+.ruler__t{position:absolute;right:0;width:10px;height:1px;background:var(--fg);opacity:.32;transform:scaleX(0);transform-origin:right center;transition:transform .7s cubic-bezier(.2,.8,.2,1),opacity .3s}
+.ruler__t--l{width:20px;opacity:.6}
+.ruler__n{position:absolute;right:24px;transform:translateY(-50%);font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--fg);opacity:0;transition:opacity .6s}
+.ruler.on .ruler__t{transform:scaleX(1)}
+.ruler.on .ruler__n{opacity:.5}
+.ruler:hover .ruler__t{opacity:.55}
+.ruler:hover .ruler__t--l{opacity:.85}
+.ruler__band{position:absolute;left:0;right:0;background:rgba(242,241,238,.08);border-top:1px solid rgba(242,241,238,.45);border-bottom:1px solid rgba(242,241,238,.45);pointer-events:none;transition:background .3s}
+.ruler:hover .ruler__band,.ruler.is-drag .ruler__band{background:rgba(242,241,238,.14)}
+.ruler__ptr{position:absolute;left:0;right:0;height:1px;background:var(--accent);box-shadow:0 0 6px var(--accent);pointer-events:none}
+.ruler__read{position:absolute;right:3px;top:4px;display:flex;align-items:center;font-family:var(--mono);font-size:9px;line-height:11px;letter-spacing:.08em;color:var(--accent-2);white-space:nowrap}
+.ruler__read em{font-style:normal;margin-left:3px}
+.odo{display:flex;height:11px;overflow:hidden}
+.odo__col{display:flex;flex-direction:column;transition:transform .28s cubic-bezier(.2,.9,.2,1)}
+.odo__col span{height:11px;display:block;text-align:center;width:.62em}
+/* разделы вдоль линейки */
+.ruler__sec{position:absolute;right:0;height:0;cursor:pointer}
+.ruler__sec span{position:absolute;right:64px;bottom:4px;white-space:nowrap;font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--fg-3);transition:color .3s;text-shadow:0 0 10px rgba(18,19,22,.95),0 0 3px rgba(18,19,22,.9)}
+.ruler__sec i{position:absolute;right:0;top:-1px;width:60px;height:2px;background:var(--fg);transform:scaleX(0);transform-origin:right;transition:transform .4s cubic-bezier(.2,.8,.2,1)}
+.ruler__sec:hover span{color:var(--fg-2)}
+.ruler__sec.is-active span{color:var(--fg)}
+.ruler__sec.is-active i{transform:scaleX(1)}
+@media (max-width:1200px){.ruler__sec span{display:none}}

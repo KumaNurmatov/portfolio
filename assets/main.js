@@ -65,30 +65,68 @@ document.querySelectorAll('.rv').forEach(el => {
 });
 document.querySelectorAll('.section').forEach(s => io.observe(s));
 
-// ---------- Линейка 0–1337 мм со счётчиком-одометром ----------
-const RULER_MM = 1337, scale = document.getElementById('rulerScale');
+// ---------- Линейка-скроллбар 0–1337 мм (по мотивам ArtCraft) ----------
+// Вся страница = 0…1337 мм. Рамка показывает видимую часть, голубая черта — где вы, разделы подписаны.
+// Клик или перетаскивание по линейке прокручивает страницу.
+const RULER_MM = 1337, ruler = document.getElementById('ruler');
 let setRuler = () => {};
-if (scale) {
-  const mark = scale.querySelector('.ruler__mark');
+if (ruler) {
+  const scale = ruler.querySelector('.ruler__scale');
+  const band = ruler.querySelector('.ruler__band'), ptr = ruler.querySelector('.ruler__ptr');
   const f = document.createDocumentFragment();
-  for (let mm = 0; mm <= RULER_MM; mm += 10) {
-    const y = (mm / RULER_MM * 100) + '%', t = document.createElement('i');
-    t.className = 'ruler__t' + (mm % 100 === 0 ? ' ruler__t--l' : mm % 50 === 0 ? ' ruler__t--m' : '');
-    t.style.top = y; f.appendChild(t);
+  for (let mm = 0, i = 0; mm <= RULER_MM; mm += 10, i++) {
+    const long = mm % 50 === 0, y = (mm / RULER_MM * 100) + '%';
+    const t = document.createElement('i');
+    t.className = 'ruler__t' + (long ? ' ruler__t--l' : ''); t.style.top = y; t.style.transitionDelay = (i * 6) + 'ms';
+    f.appendChild(t);
     if (mm % 100 === 0) {
-      const n = document.createElement('span'); n.className = 'ruler__n'; n.textContent = mm / 10; n.style.top = y; f.appendChild(n);
+      const n = document.createElement('span'); n.className = 'ruler__n'; n.textContent = mm; n.style.top = y;
+      n.style.transitionDelay = (i * 6 + 200) + 'ms'; f.appendChild(n);
     }
   }
-  scale.insertBefore(f, mark);
+  scale.prepend(f);
+  // счётчик-одометр
   const digits = '0123456789'.split('').map(d => `<span>${d}</span>`).join('');
-  const col = `<span class="odo__col">${digits}</span>`;
-  mark.innerHTML = `<span class="ruler__read"><span class="odo">${col.repeat(4)}</span> мм</span>`;
-  const cols = [...mark.querySelectorAll('.odo__col')];
-  setRuler = p => {
-    const v = String(Math.round(p * RULER_MM)).padStart(4, '0');
-    mark.style.top = (p * 100) + '%';
-    cols.forEach((c, i) => c.style.transform = `translateY(${-14 * +v[i]}px)`);
+  ptr.innerHTML = `<span class="ruler__read"><span class="odo">${`<span class="odo__col">${digits}</span>`.repeat(4)}</span><em>мм</em></span>`;
+  const cols = [...ptr.querySelectorAll('.odo__col')];
+  // подписи разделов
+  const secEls = [...document.querySelectorAll('[data-ruler]')];
+  const secs = secEls.map(el => {
+    const d = document.createElement('div'); d.className = 'ruler__sec';
+    d.innerHTML = `<span>${el.dataset.ruler}</span><i></i>`;
+    d.addEventListener('click', e => { e.stopPropagation(); lenis ? lenis.scrollTo(el, { offset: -56 }) : el.scrollIntoView({ behavior: 'smooth' }); });
+    scale.appendChild(d); return { el, d };
+  });
+  const layout = () => {
+    const H = document.documentElement.scrollHeight;
+    secs.forEach(({ el, d }) => d.style.top = (el.getBoundingClientRect().top + scrollY) / H * 100 + '%');
   };
+  layout(); addEventListener('resize', layout); addEventListener('load', layout);
+  setTimeout(layout, 1500); setTimeout(() => ruler.classList.add('on'), 300);
+
+  setRuler = () => {
+    const H = document.documentElement.scrollHeight, vh = innerHeight, top = scrollY;
+    const bTop = top / H, bH = vh / H, p = Math.min(1, Math.max(0, top / (H - vh || 1)));
+    band.style.top = bTop * 100 + '%'; band.style.height = bH * 100 + '%';
+    ptr.style.top = (bTop + bH * p) * 100 + '%';
+    const v = String(Math.round(p * RULER_MM)).padStart(4, '0');
+    cols.forEach((c, i) => c.style.transform = `translateY(${-11 * +v[i]}px)`);
+    ruler.setAttribute('aria-valuenow', Math.round(p * RULER_MM));
+    let cur = -1; secs.forEach(({ el }, i) => { if (el.getBoundingClientRect().top < vh * .45) cur = i; });
+    secs.forEach(({ d }, i) => d.classList.toggle('is-active', i === cur));
+  };
+  // клик и перетаскивание
+  let drag = false;
+  const seek = (e, immediate) => {
+    const r = scale.getBoundingClientRect(), H = document.documentElement.scrollHeight;
+    const k = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
+    const target = Math.max(0, k * H - innerHeight / 2);
+    lenis ? lenis.scrollTo(target, { immediate }) : scrollTo({ top: target, behavior: immediate ? 'auto' : 'smooth' });
+  };
+  ruler.addEventListener('pointerdown', e => { drag = true; ruler.setPointerCapture(e.pointerId); ruler.classList.add('is-drag'); seek(e, false); });
+  ruler.addEventListener('pointermove', e => drag && seek(e, true));
+  const stop = () => { drag = false; ruler.classList.remove('is-drag'); };
+  ruler.addEventListener('pointerup', stop); ruler.addEventListener('pointercancel', stop);
 }
 
 // ---------- Активный пункт меню ----------
@@ -96,7 +134,7 @@ const links = [...document.querySelectorAll('.nav__links a')].filter(a => a.getA
 const secs = links.map(a => document.querySelector(a.getAttribute('href')));
 function onScroll() {
   const h = document.documentElement, p = h.scrollTop / (h.scrollHeight - h.clientHeight || 1);
-  setRuler(Math.min(1, Math.max(0, p)));
+  setRuler();
   if (!links.length) return;
   let cur = 0; secs.forEach((s, i) => { if (s && s.getBoundingClientRect().top < innerHeight * .4) cur = i; });
   links.forEach((a, i) => a.classList.toggle('is-active', i === cur));
