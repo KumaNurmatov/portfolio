@@ -118,7 +118,7 @@ document.querySelectorAll('.card').forEach(c => c.addEventListener('pointermove'
 // ---------- Туннель летящих кадров (фон hero) ----------
 // Чтобы вместо градиентов летели работы: window.TUNNEL_IMAGES = ['media/1.jpg', ...] до подключения main.js
 const cvs = document.getElementById('tunnel');
-if (cvs) {
+if (cvs && !cvs.dataset.gl) {
   const ctx = cvs.getContext('2d');
   const palette = [['#2d81ff', '#0b1a33'], ['#ff5a36', '#2a0f08'], ['#6b3cff', '#120a2a'], ['#00d1b2', '#04221d'], ['#f2f1ee', '#3a3b40'], ['#ffcf36', '#2b2106']];
   const tex = palette.map(([a, b], i) => {
