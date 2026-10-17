@@ -97,7 +97,7 @@
     };
     im.src = src; sources.push(s);
   });
-  const vids = (window.TUNNEL_VIDEOS || []).slice(0, mobile ? 3 : 12);
+  const vids = (window.TUNNEL_VIDEOS || []).slice(0, mobile ? 2 : 7);
   vids.forEach(src => {
     const v = document.createElement('video');
     Object.assign(v, { src, muted: true, loop: true, playsInline: true, autoplay: true, preload: 'auto' });
@@ -111,7 +111,7 @@
   if (!sources.length) return;
 
   // ---------- кадры ----------
-  const N = mobile ? 26 : 46;
+  const N = mobile ? 22 : 38;
   const rnd = (a, b) => a + Math.random() * (b - a);
   const pickSource = () => {
     const ready = sources.filter(s => s.ready);
@@ -136,7 +136,7 @@
   // ---------- размеры, мышь, скролл ----------
   let W = 0, H = 0, dpr = 1;
   const resize = () => {
-    dpr = Math.min(devicePixelRatio || 1, mobile ? 1.25 : 1.6);
+    dpr = Math.min(devicePixelRatio || 1, mobile ? 1 : 1.25);
     W = cvs.clientWidth; H = cvs.clientHeight;
     for (const c of [cvs, rc]) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
     gl.viewport(0, 0, cvs.width, cvs.height);
@@ -147,7 +147,7 @@
   addEventListener('pointermove', e => { mx = e.clientX / innerWidth - .5; my = e.clientY / innerHeight - .5; });
 
   // ---------- отрисовка ----------
-  let angle = 0, last = performance.now(), running = true;
+  let angle = 0, last = performance.now(), running = true, frameNo = 0;
   function drawRings(boost) {
     rctx.clearRect(0, 0, W, H);
     const ox = W / 2 - cx * 120, oy = H / 2 + cy * 80, half = H / 2;
@@ -177,8 +177,10 @@
     cx += (mx - cx) * .05; cy += (my - cy) * .05;
     angle += dt * 0.035;
 
-    // видео → текстуры
-    for (const s of sources) if (s.video && s.dirty && s.video.readyState >= 2) {
+    // видео → текстуры: только те, что сейчас на экране, и через кадр (видео всё равно 25–30 к/с)
+    frameNo++;
+    const used = new Set(); for (const c of cards) if (c.z < Z_FAR - 0.3) used.add(c.s);
+    if (frameNo % 2 === 0) for (const s of sources) if (s.video && s.dirty && used.has(s) && s.video.readyState >= 2) {
       gl.bindTexture(gl.TEXTURE_2D, s.tex);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, s.video);
       s.dirty = false;
@@ -214,7 +216,8 @@
       gl.bindTexture(gl.TEXTURE_2D, s.tex);
       gl.drawElements(gl.TRIANGLES, idx.length, gl.UNSIGNED_SHORT, 0);
     }
-    cvs.style.opacity = rc.style.opacity = String(1 - prog * 0.7);
+    const op = String(Math.round((1 - prog * 0.7) * 100) / 100);
+    if (cvs.style.opacity !== op) cvs.style.opacity = rc.style.opacity = op;
     if (running && !reduce) requestAnimationFrame(draw);
   }
   requestAnimationFrame(draw);

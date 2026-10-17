@@ -294,7 +294,7 @@ def sites_block(sites):
     for i, x in enumerate(sites):
         link = (f'<a class="site__link mono" href="{x["url"]}" target="_blank" rel="noopener">{x["label"]} ↗</a>' if x["url"]
                 else f'<span class="site__link mono">{x["label"]}</span>')
-        mob = f'<img class="site__phone" src="../media/img/{x["m"]}.jpg" alt="" loading="lazy">' if x["m"] else ""
+        mob = f'<img class="site__phone" src="../media/img/{x["m"]}.jpg" alt="" loading="lazy" decoding="async">' if x["m"] else ""
         tags = "".join(f"<span>{t}</span>" for t in x["tags"])
         out.append(f'''      <article class="site rv">
         <div class="site__shot">
@@ -323,7 +323,7 @@ def media(name, cls=""):
         wh = f' width="{w}" height="{h}"'
     except Exception:
         wh = ""
-    return f'<img class="{cls}" src="../media/img/{name}.jpg"{wh} alt="" loading="lazy">'
+    return f'<img class="{cls}" src="../media/img/{name}.jpg"{wh} alt="" loading="lazy" decoding="async">'
 
 
 ARROW = '<svg viewBox="0 0 16 16" fill="none"><path d="M2 8h11M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5"/></svg>'

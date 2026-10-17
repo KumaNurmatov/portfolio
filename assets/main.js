@@ -65,6 +65,22 @@ document.querySelectorAll('.rv').forEach(el => {
 });
 document.querySelectorAll('.section').forEach(s => io.observe(s));
 
+// ---------- Геометрия страницы: считаем один раз, а не на каждом кадре скролла ----------
+const geo = { H: 1, vh: innerHeight, scaleH: 1, tops: new Map() };
+const measured = new Set();
+const track = el => el && measured.add(el);
+function measure() {
+  geo.H = document.documentElement.scrollHeight; geo.vh = innerHeight;
+  measured.forEach(el => geo.tops.set(el, el.getBoundingClientRect().top + scrollY));
+  const sc = document.querySelector('.ruler__scale'); if (sc) geo.scaleH = sc.clientHeight;
+  onLayout.forEach(f => f());
+}
+const onLayout = [];
+let measureTimer;
+const remeasure = () => { clearTimeout(measureTimer); measureTimer = setTimeout(measure, 120); };
+addEventListener('resize', remeasure); addEventListener('load', measure);
+if (window.ResizeObserver) new ResizeObserver(remeasure).observe(document.body);
+
 // ---------- Линейка-скроллбар 0–1337 мм (по мотивам ArtCraft) ----------
 // Вся страница = 0…1337 мм. Рамка показывает видимую часть, голубая черта — где вы, разделы подписаны.
 // Клик или перетаскивание по линейке прокручивает страницу.
@@ -97,28 +113,32 @@ if (ruler) {
     d.addEventListener('click', e => { e.stopPropagation(); lenis ? lenis.scrollTo(el, { offset: -56 }) : el.scrollIntoView({ behavior: 'smooth' }); });
     scale.appendChild(d); return { el, d };
   });
-  const layout = () => {
-    const H = document.documentElement.scrollHeight;
-    secs.forEach(({ el, d }) => d.style.top = (el.getBoundingClientRect().top + scrollY) / H * 100 + '%');
-  };
-  layout(); addEventListener('resize', layout); addEventListener('load', layout);
-  setTimeout(layout, 1500); setTimeout(() => ruler.classList.add('on'), 300);
+  secs.forEach(({ el }) => track(el));
+  onLayout.push(() => {
+    secs.forEach(({ el, d }) => d.style.top = geo.tops.get(el) / geo.H * 100 + '%');
+    band.style.height = geo.vh / geo.H * 100 + '%';
+  });
+  setTimeout(() => ruler.classList.add('on'), 300);
+  let lastV = '', lastCur = -2;
 
-  setRuler = () => {
-    const H = document.documentElement.scrollHeight, vh = innerHeight, top = scrollY;
+  // только transform — без пересчёта раскладки
+  setRuler = top => {
+    const { H, vh, scaleH } = geo;
     const bTop = top / H, bH = vh / H, p = Math.min(1, Math.max(0, top / (H - vh || 1)));
-    band.style.top = bTop * 100 + '%'; band.style.height = bH * 100 + '%';
-    ptr.style.top = (bTop + bH * p) * 100 + '%';
+    band.style.transform = `translate3d(0,${bTop * scaleH}px,0)`;
+    ptr.style.transform = `translate3d(0,${(bTop + bH * p) * scaleH}px,0)`;
     const v = String(Math.round(p * RULER_MM)).padStart(4, '0');
-    cols.forEach((c, i) => c.style.transform = `translateY(${-11 * +v[i]}px)`);
-    ruler.setAttribute('aria-valuenow', Math.round(p * RULER_MM));
-    let cur = -1; secs.forEach(({ el }, i) => { if (el.getBoundingClientRect().top < vh * .45) cur = i; });
-    secs.forEach(({ d }, i) => d.classList.toggle('is-active', i === cur));
+    if (v !== lastV) {
+      for (let i = 0; i < 4; i++) if (v[i] !== lastV[i]) cols[i].style.transform = `translateY(${-11 * +v[i]}px)`;
+      lastV = v; ruler.setAttribute('aria-valuenow', +v);
+    }
+    let cur = -1; secs.forEach(({ el }, i) => { if (geo.tops.get(el) - top < vh * .45) cur = i; });
+    if (cur !== lastCur) { secs.forEach(({ d }, i) => d.classList.toggle('is-active', i === cur)); lastCur = cur; }
   };
   // клик и перетаскивание
   let drag = false;
   const seek = (e, immediate) => {
-    const r = scale.getBoundingClientRect(), H = document.documentElement.scrollHeight;
+    const r = scale.getBoundingClientRect(), H = geo.H;
     const k = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
     const target = Math.max(0, k * H - innerHeight / 2);
     lenis ? lenis.scrollTo(target, { immediate }) : scrollTo({ top: target, behavior: immediate ? 'auto' : 'smooth' });
@@ -132,14 +152,19 @@ if (ruler) {
 // ---------- Активный пункт меню ----------
 const links = [...document.querySelectorAll('.nav__links a')].filter(a => a.getAttribute('href').startsWith('#'));
 const secs = links.map(a => document.querySelector(a.getAttribute('href')));
+secs.forEach(track);
+let navCur = -1, ticking = false;
 function onScroll() {
-  const h = document.documentElement, p = h.scrollTop / (h.scrollHeight - h.clientHeight || 1);
-  setRuler();
+  ticking = false;
+  const top = scrollY;
+  setRuler(top);
   if (!links.length) return;
-  let cur = 0; secs.forEach((s, i) => { if (s && s.getBoundingClientRect().top < innerHeight * .4) cur = i; });
-  links.forEach((a, i) => a.classList.toggle('is-active', i === cur));
+  let cur = 0; secs.forEach((s, i) => { if (s && geo.tops.get(s) - top < geo.vh * .4) cur = i; });
+  if (cur !== navCur) { links.forEach((a, i) => a.classList.toggle('is-active', i === cur)); navCur = cur; }
 }
-addEventListener('scroll', onScroll, { passive: true }); onScroll();
+// не чаще одного раза за кадр
+addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
+measure(); onScroll();
 
 // ---------- Свечение за курсором ----------
 const glow = document.getElementById('glow');
