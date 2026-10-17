@@ -25,7 +25,7 @@
   const VS = `#version 300 es
   in vec2 a_uv;
   uniform vec3 u_c; uniform vec2 u_s; uniform float u_rot, u_aspect, u_f, u_k; uniform vec2 u_cam;
-  out vec2 v_uv; out vec2 v_ndc;
+  out vec2 v_uv; out vec2 v_ndc; out vec2 v_n;
   void main(){
     vec2 l = (a_uv - .5) * u_s;
     float c = cos(u_rot), s = sin(u_rot);
@@ -35,12 +35,12 @@
     q *= 1. + u_k * dot(q, q);             // искажение линзы
     vec2 n = vec2(q.x / u_aspect, q.y);
     gl_Position = vec4(n, 0., 1.);
-    v_uv = a_uv; v_ndc = q;
+    v_uv = a_uv; v_ndc = q; v_n = n;
   }`;
   const FS = `#version 300 es
   precision highp float;
-  in vec2 v_uv; in vec2 v_ndc; out vec4 o;
-  uniform sampler2D u_t; uniform vec4 u_crop; uniform float u_a, u_ca; uniform vec2 u_px;
+  in vec2 v_uv; in vec2 v_ndc; in vec2 v_n; out vec4 o;
+  uniform sampler2D u_t; uniform vec4 u_crop; uniform float u_a, u_ca; uniform vec2 u_px, u_hole;
   float sdr(vec2 p, vec2 b, float r){ vec2 q = abs(p) - b + r; return length(max(q, 0.)) + min(max(q.x, q.y), 0.) - r; }
   void main(){
     vec2 p = (v_uv - .5) * u_px;
@@ -53,13 +53,16 @@
     vec2 dir = v_ndc * u_ca * (1. + edge * 4.);
     vec3 col = vec3(texture(u_t, uv + dir).r, texture(u_t, uv).g, texture(u_t, uv - dir).b);
     col += edge * vec3(.05, .055, .07);
-    o = vec4(col * u_a * m, u_a * m);
+    // за текстом в центре кадры почти гаснут, чтобы текст читался
+    float e = length(v_n / u_hole);
+    float a = u_a * m * mix(.08, 1., smoothstep(.75, 1.25, e));
+    o = vec4(col * a, a);
   }`;
   const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s)); return s; };
   const prog = gl.createProgram();
   gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog);
   gl.useProgram(prog);
-  const U = {}; ['u_c', 'u_s', 'u_rot', 'u_aspect', 'u_f', 'u_k', 'u_cam', 'u_t', 'u_crop', 'u_a', 'u_ca', 'u_px'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
+  const U = {}; ['u_hole', 'u_c', 'u_s', 'u_rot', 'u_aspect', 'u_f', 'u_k', 'u_cam', 'u_t', 'u_crop', 'u_a', 'u_ca', 'u_px'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
 
   // сетка 16×16 — чтобы линза гнула края кадра
   const G = 16, uv = [], idx = [];
@@ -118,11 +121,11 @@
   const spawn = (c, z) => {
     let x, y, tries = 0;
     do { x = rnd(-3.2, 3.2); y = rnd(-2, 2); tries++; }
-    while (tries < 6 && Math.abs(x) < 0.9 && Math.abs(y) < 0.55 && Math.random() < 0.75);
+    while (tries < 8 && Math.abs(x) < 1.1 && Math.abs(y) < 0.7);
     const s = pickSource();
     const asp = Math.min(1.9, Math.max(0.8, s.w / s.h));
     const w = rnd(0.42, 0.95);
-    Object.assign(c, { x, y, z: z ?? Z_FAR + rnd(0, 0.8), s, w, h: w / asp, rot: rnd(-0.05, 0.05), spin: rnd(-0.02, 0.02) });
+    Object.assign(c, { x, y, z: z ?? Z_FAR + rnd(0, 0.8), s, w, h: w / asp, rot: 0 });
   };
   const cards = Array.from({ length: N }, (_, i) => { const c = {}; spawn(c, Z_NEAR + 0.3 + (i / N) * (Z_FAR - Z_NEAR)); return c; });
 
@@ -185,9 +188,11 @@
     gl.uniform1f(U.u_aspect, W / H); gl.uniform1f(U.u_f, F); gl.uniform1f(U.u_k, K);
     gl.uniform2f(U.u_cam, cx * 0.9, -cy * 0.6); gl.uniform1f(U.u_ca, 0.006);
     gl.activeTexture(gl.TEXTURE0); gl.uniform1i(U.u_t, 0);
+    // «дырка» под текст: половина ширины/высоты блока текста в долях экрана
+    gl.uniform2f(U.u_hole, Math.min(.92, 640 / W), Math.min(.8, 330 / H));
 
     const speed = (reduce ? 0 : 0.42) * (1 + boost);
-    for (const c of cards) { c.z -= dt * speed; c.rot += dt * c.spin; if (c.z < Z_NEAR) spawn(c); }
+    for (const c of cards) { c.z -= dt * speed; if (c.z < Z_NEAR) spawn(c); }
     for (const r of rings) { r.z -= dt * speed * 0.8; if (r.z < Z_NEAR) { r.z = Z_FAR; r.a = rnd(0, 6.28); } }
     drawRings(boost);
 
@@ -202,7 +207,7 @@
       gl.uniform4f(U.u_crop, (1 - sx) / 2, (1 - sy) / 2, sx, sy);
       gl.uniform3f(U.u_c, c.x * ca - c.y * sa, c.x * sa + c.y * ca, c.z);
       gl.uniform2f(U.u_s, c.w, c.h);
-      gl.uniform1f(U.u_rot, c.rot + angle);
+      gl.uniform1f(U.u_rot, 0);           // кадры всегда ровные, по кругу движется только поле
       const pxH = c.h * F / c.z * (H / 2) * dpr;
       gl.uniform2f(U.u_px, pxH * cardAsp, pxH);
       gl.uniform1f(U.u_a, fade);
