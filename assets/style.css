@@ -504,3 +504,8 @@ html.lead-lock,html.lead-lock body{overflow:hidden}
 .lead__tg{width:100%;justify-content:center;height:52px;margin-bottom:10px;background:#2aabee;border-color:#2aabee;color:#fff}
 .lead__tg:hover{background:#1e96d4;border-color:#1e96d4}
 .lead__row--sub .btn{flex:1;justify-content:center}
+.lead__own{position:relative;margin-top:12px}
+.lead__own .lead__input{padding-right:120px}
+.lead__own-hint{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--fg-3);font-size:9.5px;pointer-events:none;opacity:0;transition:opacity .2s}
+.lead__own .lead__input:focus + .lead__own-hint{opacity:1}
+@media (max-width:760px){.lead__own .lead__input{padding-right:12px}.lead__own-hint{display:none}}

@@ -13,8 +13,8 @@
   // ---------- вопросы ----------
   const SERVICES = [['identity', 'Айдентика'], ['motion', 'Моушн'], ['ai', 'ИИ-видео и визуалы'], ['ads', 'Креативы для таргета'],
     ['smm', 'SMM-контент'], ['web', 'Сайт'], ['print', 'Полиграфия / наружка'], ['photo-video', 'Фото / видео'], ['unsure', 'Не знаю — помогите разобраться']];
-  const GOALS = ['Запуск нового продукта', 'Больше заявок и продаж', 'Обновить бренд', 'Контент на месяц', 'LED / выставка / ивент', 'Другое'];
-  const SPHERES = ['Недвижимость', 'Банк / финтех', 'Авто', 'HoReCa', 'E-com / ритейл', 'Красота / здоровье', 'Другое'];
+  const GOALS = ['Запуск нового продукта', 'Больше заявок и продаж', 'Обновить бренд', 'Контент на месяц', 'LED / выставка / ивент'];
+  const SPHERES = ['Недвижимость', 'Банк / финтех', 'Авто', 'HoReCa', 'E-com / ритейл', 'Красота / здоровье'];
   const DETAILS = {
     web: { q: 'Какой сайт нужен?', opts: ['Лендинг', 'Многостраничный', 'Интернет-магазин', 'Веб-сервис / дашборд', 'ИИ-консультант', '3D / интерактивная карта', 'Редизайн существующего'] },
     ads: { q: 'Где будет реклама?', opts: ['Instagram / Facebook', 'TikTok', 'Google / YouTube', 'Telegram', 'Статика и видео', '5–10 креативов в месяц', '20+ креативов в месяц'] },
@@ -44,11 +44,20 @@
   const label = k => (SERVICES.find(s => s[0] === k) || [k, k])[1];
 
   // ---------- состояние ----------
-  const S = { services: PAGE_SERVICE && DETAILS[PAGE_SERVICE] ? [PAGE_SERVICE] : [], goal: '', sphere: '', sphereOther: '',
+  const S = { services: PAGE_SERVICE && DETAILS[PAGE_SERVICE] ? [PAGE_SERVICE] : [], goal: '', sphere: '', own: { service: '', goal: '', sphere: '', detail: '', timing: '', budget: '' },
     detail: [], timing: '', budget: '', brief: '', briefEdited: false, name: '', channel: 'Telegram', contact: '', website: '' };
   const detailKey = () => DETAIL_ORDER.find(k => S.services.includes(k));
   const steps = () => ['service', 'goal', 'sphere', ...(detailKey() ? ['detail'] : []), 'timing', 'budget', 'result'];
   let step = 0, isOpen = false, mode = 'quiz', sentId = '', botName = '';
+  // ответ на шаге: выбранный чип или свой вариант
+  const val = id => S[id] || S.own[id].trim();
+  const svcList = () => [...S.services.filter(s => s !== 'unsure').map(label), S.own.service.trim()].filter(Boolean);
+  const detailList = () => [...S.detail, S.own.detail.trim()].filter(Boolean);
+  const answered = id => id === 'service' ? !!(S.services.length || S.own.service.trim())
+    : id === 'detail' ? !!(S.detail.length || S.own.detail.trim()) : !!val(id);
+  const OWN_PH = { service: 'Свой вариант, например «оформить стенд на выставку»', goal: 'Своя цель', sphere: 'Ваша сфера, например «стоматология»',
+    detail: 'Свой вариант', timing: 'Например, «к 15 ноября»', budget: 'Своя сумма или вилка' };
+  const ownField = id => `<div class="lead__own"><input class="lead__input" name="own" placeholder="${OWN_PH[id]}" maxlength="140" autocomplete="off"><span class="lead__own-hint mono">Enter — дальше</span></div>`;
 
   // ---------- разметка ----------
   const root = document.createElement('div');
@@ -72,23 +81,22 @@
   }).join('')}</div>${multi ? '<p class="lead__hint mono">Можно выбрать несколько</p>' : ''}`;
 
   function makeBrief() {
-    const svc = S.services.filter(s => s !== 'unsure').map(label);
+    const svc = svcList();
     const parts = [];
     parts.push(svc.length ? `Нужно: ${svc.map(lc).join(', ')}.` : 'Пока не понимаю, какой формат нужен — нужна консультация.');
-    const dk = detailKey();
-    if (dk && S.detail.length) parts.push(`${DETAILS[dk].q.replace('?', '')}: ${S.detail.map(lc).join(', ')}.`);
-    if (S.goal) parts.push(`Цель — ${lc(S.goal)}.`);
-    const sph = S.sphere === 'Другое' && S.sphereOther ? S.sphereOther : S.sphere;
-    if (sph) parts.push(`Сфера — ${lc(sph)}.`);
-    if (S.timing) parts.push(`Сроки: ${lc(S.timing)}.`);
-    if (S.budget) parts.push(`Бюджет: ${S.budget}.`);
+    const dk = detailKey(), det = detailList();
+    if (det.length) parts.push(`${dk ? DETAILS[dk].q.replace('?', '') : 'Детали'}: ${det.map(lc).join(', ')}.`);
+    if (val('goal')) parts.push(`Цель — ${lc(val('goal'))}.`);
+    if (val('sphere')) parts.push(`Сфера — ${lc(val('sphere'))}.`);
+    if (val('timing')) parts.push(`Сроки: ${lc(val('timing'))}.`);
+    if (val('budget')) parts.push(`Бюджет: ${val('budget')}.`);
     return parts.join(' ');
   }
   function estimate() {
     const r = S.services.filter(k => DAYS[k]).map(k => DAYS[k]);
     if (!r.length) return 'Сначала короткий созвон на 15 минут — разберёмся в задаче и выберем формат.';
     const from = Math.max(...r.map(x => x[0])), to = Math.max(...r.map(x => x[1])) + (r.length - 1) * 3;
-    return `Ориентировочно ${from}–${to} рабочих дней${S.timing.startsWith('За неделю') && to > 7 ? ', срочный режим обсудим' : ''}.`;
+    return `Ориентировочно ${from}–${to} рабочих дней${val('timing').startsWith('За неделю') && to > 7 ? ', срочный режим обсудим' : ''}.`;
   }
 
   // ---------- экраны ----------
@@ -126,28 +134,25 @@
     }
 
     if (id === 'service') {
-      body.innerHTML = `<h3 class="lead__q" id="leadQ">Что нужно сделать?</h3>${chips(SERVICES, S.services, true)}`;
-      next.disabled = !S.services.length;
+      body.innerHTML = `<h3 class="lead__q" id="leadQ">Что нужно сделать?</h3>${chips(SERVICES, S.services, true)}${ownField(id)}`;
     } else if (id === 'goal') {
-      body.innerHTML = `<h3 class="lead__q" id="leadQ">Какая главная цель?</h3>${chips(GOALS, [S.goal])}`;
-      next.disabled = !S.goal;
+      body.innerHTML = `<h3 class="lead__q" id="leadQ">Какая главная цель?</h3>${chips(GOALS, [S.goal])}${ownField(id)}`;
     } else if (id === 'sphere') {
-      body.innerHTML = `<h3 class="lead__q" id="leadQ">В какой вы сфере?</h3>${chips(SPHERES, [S.sphere])}
-        <input class="lead__input" name="sphereOther" placeholder="Опишите сферу" maxlength="80" ${S.sphere === 'Другое' ? '' : 'hidden'}>`;
-      body.querySelector('[name=sphereOther]').value = S.sphereOther;
-      next.disabled = !S.sphere;
+      body.innerHTML = `<h3 class="lead__q" id="leadQ">В какой вы сфере?</h3>${chips(SPHERES, [S.sphere])}${ownField(id)}`;
     } else if (id === 'detail') {
       const d = DETAILS[detailKey()];
-      body.innerHTML = `<h3 class="lead__q" id="leadQ">${d.q}</h3>${chips(d.opts, S.detail, !d.single)}`;
-      next.disabled = !S.detail.length;
+      body.innerHTML = `<h3 class="lead__q" id="leadQ">${d.q}</h3>${chips(d.opts, S.detail, !d.single)}${ownField(id)}`;
     } else if (id === 'timing') {
-      body.innerHTML = `<h3 class="lead__q" id="leadQ">Когда нужен результат?</h3>${chips(TIMING, [S.timing])}`;
-      next.disabled = !S.timing;
+      body.innerHTML = `<h3 class="lead__q" id="leadQ">Когда нужен результат?</h3>${chips(TIMING, [S.timing])}${ownField(id)}`;
     } else if (id === 'budget') {
-      body.innerHTML = `<h3 class="lead__q" id="leadQ">На какой бюджет ориентируетесь?</h3>${chips(BUDGET, [S.budget])}
+      body.innerHTML = `<h3 class="lead__q" id="leadQ">На какой бюджет ориентируетесь?</h3>${chips(BUDGET, [S.budget])}${ownField(id)}
         <button type="button" class="lead__skip mono" data-act="skip">Пропустить</button>`;
-      next.disabled = !S.budget;
-    } else if (id === 'result') {
+    }
+    if (id in OWN_PH) {
+      body.querySelector('[name=own]').value = S.own[id];
+      next.disabled = !answered(id);
+    }
+    if (id === 'result') {
       if (!S.briefEdited) S.brief = makeBrief();
       const key = S.services.find(k => WORKS[k]);
       const works = key ? WORKS[key].map(src => `<img src="${BASE}${src}" alt="" loading="lazy">`).join('') : '';
@@ -174,7 +179,7 @@
     const act = e.target.closest('[data-act]')?.dataset.act;
     if (act === 'start') { mode = 'quiz'; step = 0; render(); return; }
     if (act === 'later' || act === 'close') { close(); return; }
-    if (act === 'skip') { S.budget = ''; go(1); return; }
+    if (act === 'skip') { S.budget = ''; S.own.budget = ''; go(1); return; }
     const ch = e.target.closest('[data-ch]');
     if (ch) { S.channel = ch.dataset.ch; saveInputs(); render(); return; }
     const chip = e.target.closest('.lead__chip[data-v]'); if (!chip) return;
@@ -186,15 +191,25 @@
     }
     if (id === 'detail' && !DETAILS[detailKey()].single) { S.detail = S.detail.includes(v) ? S.detail.filter(x => x !== v) : [...S.detail, v]; render(); return; }
     // одиночный выбор — сразу дальше
+    S.own[id] = '';                                     // выбрали готовый ответ — свой вариант не нужен
     if (id === 'goal') S.goal = v;
-    if (id === 'sphere') { S.sphere = v; if (v === 'Другое') { render(); body.querySelector('[name=sphereOther]').focus(); return; } }
+    if (id === 'sphere') S.sphere = v;
     if (id === 'detail') S.detail = [v];
     if (id === 'timing') S.timing = v;
     if (id === 'budget') S.budget = v;
     render(); setTimeout(() => go(1), 220);
   });
   body.addEventListener('input', e => {
-    if (e.target.name === 'sphereOther') S.sphereOther = e.target.value;
+    if (e.target.name === 'own') {
+      const id = steps()[step], single = !['service', 'detail'].includes(id) || (id === 'detail' && DETAILS[detailKey()].single);
+      S.own[id] = e.target.value;
+      // в вопросах с одним ответом свой вариант заменяет выбранный чип
+      if (single && e.target.value.trim()) {
+        if (id === 'detail') S.detail = []; else S[id] = '';
+        body.querySelectorAll('.lead__chip.is-on').forEach(c => { c.classList.remove('is-on'); c.setAttribute('aria-pressed', 'false'); });
+      }
+      next.disabled = !answered(id);
+    }
     if (e.target.name === 'brief') { S.brief = e.target.value; S.briefEdited = true; }
   });
   function saveInputs() {
@@ -204,6 +219,9 @@
     if (f('website')) S.website = f('website').value;
     if (f('brief')) S.brief = f('brief').value.trim();
   }
+  body.addEventListener('keydown', e => {
+    if (e.target.name === 'own' && e.key === 'Enter') { e.preventDefault(); if (answered(steps()[step])) go(1); }
+  });
   function go(d) { step = Math.max(0, Math.min(steps().length - 1, step + d)); render(); }
   back.addEventListener('click', () => go(-1));
   next.addEventListener('click', () => { steps()[step] === 'result' ? send() : go(1); });
@@ -218,8 +236,8 @@
       body.querySelector('[name=contact]').focus(); return;
     }
     err.hidden = true; next.disabled = true; next.textContent = 'Отправляю…';
-    const payload = { services: S.services.map(label), goal: S.goal, sphere: S.sphere === 'Другое' ? S.sphereOther || 'Другое' : S.sphere,
-      detail: S.detail, timing: S.timing, budget: S.budget, brief: S.brief, name: S.name, channel: S.channel, contact: S.contact,
+    const payload = { services: svcList().length ? svcList() : S.services.map(label), goal: val('goal'), sphere: val('sphere'),
+      detail: detailList(), timing: val('timing'), budget: val('budget'), brief: S.brief, name: S.name, channel: S.channel, contact: S.contact,
       website: S.website, page: location.href, estimate: estimate(),
       worksUrl: (k => k ? `${BASE}services/${k}.html` : BASE)(S.services.find(k => WORKS[k])) };
     try {
