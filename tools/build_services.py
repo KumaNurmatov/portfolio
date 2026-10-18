@@ -367,7 +367,7 @@ def page(s, nxt):
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Inter:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/style.css">
 </head>
-<body>
+<body data-service="{s["slug"]}">
 <!-- Страница сгенерирована tools/build_services.py — правь тексты там -->
 
 <header class="nav">
@@ -384,7 +384,7 @@ def page(s, nxt):
   <div class="nav__spacer"></div>
   <span class="nav__item nav__status mono"><i class="dot"></i>Открыт к работе</span>
   <a href="{BEHANCE}" class="nav__item mono" target="_blank" rel="noopener">Behance</a>
-  <a href="#contact" class="nav__cta mono">Обсудить проект</a>
+  <a href="#contact" class="nav__cta mono" data-lead>Обсудить проект</a>
   <button class="nav__burger" aria-label="Меню" aria-expanded="false"><span></span><span></span></button>
 </header>
 <div class="menu" id="menu">
@@ -406,7 +406,7 @@ def page(s, nxt):
     <div class="s-lead">
       <p class="rv">{s["lead"]}</p>
       <div class="hero__btns rv">
-        <a href="#contact" class="btn btn--solid">Обсудить задачу {ARROW}</a>
+        <a href="#contact" class="btn btn--solid" data-lead>Обсудить задачу {ARROW}</a>
         <a href="{BEHANCE}" class="btn" target="_blank" rel="noopener">Работы на Behance</a>
       </div>
     </div>
@@ -495,6 +495,7 @@ def page(s, nxt):
 
 <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
 <script src="../assets/main.js"></script>
+<script src="../assets/lead.js"></script>
 </body>
 </html>
 '''

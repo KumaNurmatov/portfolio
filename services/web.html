@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Inter:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/style.css">
 </head>
-<body>
+<body data-service="web">
 <!-- Страница сгенерирована tools/build_services.py — правь тексты там -->
 
 <header class="nav">
@@ -27,7 +27,7 @@
   <div class="nav__spacer"></div>
   <span class="nav__item nav__status mono"><i class="dot"></i>Открыт к работе</span>
   <a href="https://www.behance.net/nkurmanbek" class="nav__item mono" target="_blank" rel="noopener">Behance</a>
-  <a href="#contact" class="nav__cta mono">Обсудить проект</a>
+  <a href="#contact" class="nav__cta mono" data-lead>Обсудить проект</a>
   <button class="nav__burger" aria-label="Меню" aria-expanded="false"><span></span><span></span></button>
 </header>
 <div class="menu" id="menu">
@@ -49,7 +49,7 @@
     <div class="s-lead">
       <p class="rv">Делаю сайты, которые продают и работают: лендинги жилых комплексов, сайты с ИИ-консультантом, 3D и интерактивными картами, а также внутренние сервисы, которые заменяют хаос в WhatsApp и Excel.</p>
       <div class="hero__btns rv">
-        <a href="#contact" class="btn btn--solid">Обсудить задачу <svg viewBox="0 0 16 16" fill="none"><path d="M2 8h11M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5"/></svg></a>
+        <a href="#contact" class="btn btn--solid" data-lead>Обсудить задачу <svg viewBox="0 0 16 16" fill="none"><path d="M2 8h11M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5"/></svg></a>
         <a href="https://www.behance.net/nkurmanbek" class="btn" target="_blank" rel="noopener">Работы на Behance</a>
       </div>
     </div>
@@ -245,5 +245,6 @@
 
 <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
 <script src="../assets/main.js"></script>
+<script src="../assets/lead.js"></script>
 </body>
 </html>
