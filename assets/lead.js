@@ -48,7 +48,7 @@
     detail: [], timing: '', budget: '', brief: '', briefEdited: false, name: '', channel: 'Telegram', contact: '', website: '' };
   const detailKey = () => DETAIL_ORDER.find(k => S.services.includes(k));
   const steps = () => ['service', 'goal', 'sphere', ...(detailKey() ? ['detail'] : []), 'timing', 'budget', 'result'];
-  let step = 0, isOpen = false, mode = 'quiz';
+  let step = 0, isOpen = false, mode = 'quiz', sentId = '', botName = '';
 
   // ---------- разметка ----------
   const root = document.createElement('div');
@@ -109,9 +109,15 @@
       return;
     }
     if (mode === 'done') {
-      body.innerHTML = `<h3 class="lead__q" id="leadQ">Спасибо<span class="lead__name"></span>!</h3>
+      const tgLink = botName && sentId ? `https://t.me/${botName}?start=${sentId}` : '';
+      const works = `${BASE}${S.services[0] && DETAILS[S.services[0]] ? 'services/' + S.services[0] + '.html' : '#works'}`;
+      body.innerHTML = tgLink ? `<h3 class="lead__q" id="leadQ">Бриф у меня<span class="lead__name"></span>!</h3>
+        <p class="lead__p">Последний шаг: откройте бота — он сразу пришлёт ваш бриф, сроки и кнопку записи на созвон. Там же можно дописать детали и скинуть референсы.</p>
+        <a class="btn btn--solid lead__tg" href="${tgLink}" target="_blank" rel="noopener">Открыть в Telegram →</a>
+        <div class="lead__row lead__row--sub"><a class="btn" href="${works}">Смотреть работы</a><button type="button" class="btn" data-act="close">Закрыть</button></div>`
+      : `<h3 class="lead__q" id="leadQ">Спасибо<span class="lead__name"></span>!</h3>
         <p class="lead__p">${ENDPOINT ? `Бриф у меня. Отвечу в ${S.channel} в течение дня — обычно быстрее.` : 'Открылся WhatsApp с готовым брифом — осталось нажать «Отправить». Отвечу в течение дня.'}</p>
-        <div class="lead__row"><a class="btn btn--solid" href="${BASE}${S.services[0] && DETAILS[S.services[0]] ? 'services/' + S.services[0] + '.html' : '#works'}">Смотреть работы</a><button type="button" class="btn" data-act="close">Закрыть</button></div>`;
+        <div class="lead__row"><a class="btn btn--solid" href="${works}">Смотреть работы</a><button type="button" class="btn" data-act="close">Закрыть</button></div>`;
       if (S.name) body.querySelector('.lead__name').textContent = ', ' + S.name;
       return;
     }
@@ -211,11 +217,14 @@
     err.hidden = true; next.disabled = true; next.textContent = 'Отправляю…';
     const payload = { services: S.services.map(label), goal: S.goal, sphere: S.sphere === 'Другое' ? S.sphereOther || 'Другое' : S.sphere,
       detail: S.detail, timing: S.timing, budget: S.budget, brief: S.brief, name: S.name, channel: S.channel, contact: S.contact,
-      website: S.website, page: location.href };
+      website: S.website, page: location.href, estimate: estimate(),
+      worksUrl: (k => k ? `${BASE}services/${k}.html` : BASE)(S.services.find(k => WORKS[k])) };
     try {
       if (!ENDPOINT) throw new Error('no endpoint');
       const r = await fetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       if (!r.ok) throw new Error('HTTP ' + r.status);
+      const res = await r.json().catch(() => ({}));
+      sentId = res.id || ''; botName = res.bot || '';
       ls.set('lead_sent', Date.now()); mode = 'done'; render();
     } catch {
       // запасной путь: готовый текст в WhatsApp

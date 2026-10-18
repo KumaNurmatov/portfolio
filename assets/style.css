@@ -493,3 +493,6 @@ html::-webkit-scrollbar,body::-webkit-scrollbar{display:none;width:0;height:0}
   .lead{left:0;right:0;bottom:0;width:100%;max-height:88svh;border-left:0;border-right:0}
   .lead-pill{left:12px;bottom:12px;height:38px;padding:0 12px;font-size:10px}
 }
+.lead__tg{width:100%;justify-content:center;height:52px;margin-bottom:10px;background:#2aabee;border-color:#2aabee;color:#fff}
+.lead__tg:hover{background:#1e96d4;border-color:#1e96d4}
+.lead__row--sub .btn{flex:1;justify-content:center}
