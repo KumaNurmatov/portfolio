@@ -53,7 +53,8 @@
   // ---------- разметка ----------
   const root = document.createElement('div');
   root.innerHTML = `
-  <div class="lead" role="dialog" aria-modal="false" aria-labelledby="leadQ" data-lenis-prevent hidden>
+  <div class="lead-backdrop" hidden></div>
+  <div class="lead" role="dialog" aria-modal="true" aria-labelledby="leadQ" tabindex="-1" data-lenis-prevent hidden>
     <div class="lead__head"><span class="mono lead__step"></span><button class="lead__x" type="button" aria-label="Закрыть">✕</button></div>
     <div class="lead__bar"><i></i></div>
     <div class="lead__body"></div>
@@ -63,7 +64,7 @@
   document.body.append(...root.children);
   const box = document.querySelector('.lead'), body = box.querySelector('.lead__body'), stepEl = box.querySelector('.lead__step');
   const bar = box.querySelector('.lead__bar i'), back = box.querySelector('.lead__back'), next = box.querySelector('.lead__next');
-  const pill = document.querySelector('.lead-pill');
+  const pill = document.querySelector('.lead-pill'), backdrop = document.querySelector('.lead-backdrop');
 
   const chips = (opts, sel, multi) => `<div class="lead__chips">${opts.map(o => {
     const [v, t] = Array.isArray(o) ? o : [o, o];
@@ -103,7 +104,9 @@
     next.disabled = false; next.textContent = 'Дальше';
 
     if (mode === 'teaser') {
-      body.innerHTML = `<h3 class="lead__q" id="leadQ">Задача есть, но&nbsp;пока размыто?</h3>
+      const strip = (WORKS[PAGE_SERVICE] || [WORKS.ads[0], WORKS.web[0], WORKS.motion[0]]).map(src => `<img src="${BASE}${src}" alt="">`).join('');
+      body.innerHTML = `<div class="lead__strip">${strip}</div>
+        <h3 class="lead__q" id="leadQ">Задача есть, но&nbsp;пока размыто?</h3>
         <p class="lead__p">Ответьте на 6 коротких вопросов — соберу из них понятное ТЗ, покажу похожие работы и сроки.</p>
         <div class="lead__row"><button type="button" class="btn btn--solid" data-act="start">Давай</button><button type="button" class="btn" data-act="later">Позже</button></div>`;
       return;
@@ -243,16 +246,36 @@
   }
 
   // ---------- открыть / закрыть ----------
+  let lastFocus = null;
   function open(m) {
     mode = m; if (m === 'quiz' && step > steps().length - 1) step = 0;
-    box.hidden = false; requestAnimationFrame(() => box.classList.add('is-open'));
+    lastFocus = document.activeElement;
+    box.hidden = backdrop.hidden = false;
+    requestAnimationFrame(() => { box.classList.add('is-open'); backdrop.classList.add('is-open'); });
     isOpen = true; pill.classList.add('is-hidden'); render();
+    // модалка: страница под ней не скроллится
+    window.lenis ? window.lenis.stop() : null;
+    document.documentElement.classList.add('lead-lock');
+    setTimeout(() => (box.querySelector('.lead__chip') || box.querySelector('.lead__body .btn') || box).focus({ preventScroll: true }), 60);
   }
   function close() {
-    box.classList.remove('is-open'); isOpen = false; pill.classList.remove('is-hidden');
-    setTimeout(() => { if (!isOpen) box.hidden = true; }, 350);
+    box.classList.remove('is-open'); backdrop.classList.remove('is-open'); isOpen = false; pill.classList.remove('is-hidden');
+    setTimeout(() => { if (!isOpen) box.hidden = backdrop.hidden = true; }, 350);
+    window.lenis ? window.lenis.start() : null;
+    document.documentElement.classList.remove('lead-lock');
     if (mode !== 'done') ls.set('lead_dismiss', Date.now());
+    lastFocus && lastFocus.focus && lastFocus.focus({ preventScroll: true });
   }
+  backdrop.addEventListener('click', close);
+  // фокус не уходит из модалки по Tab
+  box.addEventListener('keydown', e => {
+    if (e.key !== 'Tab') return;
+    const f = [...box.querySelectorAll('button:not([hidden]):not(:disabled), a[href], input:not([hidden]):not(.lead__hp), textarea')].filter(el => el.offsetParent);
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
   document.addEventListener('click', e => {
     const t = e.target.closest('[data-lead]'); if (!t) return;
     e.preventDefault(); open(mode === 'done' ? 'done' : 'quiz');
