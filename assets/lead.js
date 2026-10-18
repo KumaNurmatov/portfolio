@@ -1,7 +1,7 @@
 // Попап-бриф: ловим интерес, задаём 6 коротких вопросов, собираем ТЗ и отправляем заявку в Telegram.
 // Заявки уходят на Cloudflare Worker (см. worker/README.md). Пока ENDPOINT пустой — запасной путь через WhatsApp.
 (() => {
-  const ENDPOINT = '';                     // URL воркера, например https://lead.<имя>.workers.dev
+  const ENDPOINT = 'https://lead.kurmanbeknurmatov2003.workers.dev';   // Cloudflare Worker, см. worker/README.md
   const WHATSAPP = '996709906852';
   const BASE = new URL('..', document.currentScript.src).href;   // корень сайта
   const PAGE_SERVICE = document.body.dataset.service || '';
