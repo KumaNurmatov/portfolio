@@ -153,14 +153,20 @@ if (ruler) {
 const links = [...document.querySelectorAll('.nav__links a')].filter(a => a.getAttribute('href').startsWith('#'));
 const secs = links.map(a => document.querySelector(a.getAttribute('href')));
 secs.forEach(track);
-let navCur = -1, ticking = false;
+const pageLinks = [...document.querySelectorAll('.nav__links a.is-active:not([href^="#"])')];   // «Услуги»/«Клиенты» на подстраницах
+let navCur = -2, ticking = false;
 function onScroll() {
   ticking = false;
   const top = scrollY;
   setRuler(top);
   if (!links.length) return;
-  let cur = 0; secs.forEach((s, i) => { if (s && geo.tops.get(s) - top < geo.vh * .4) cur = i; });
-  if (cur !== navCur) { links.forEach((a, i) => a.classList.toggle('is-active', i === cur)); navCur = cur; }
+  // на подстраницах якорная ссылка в меню одна («Контакт») — подсвечиваем её, только когда дошли до раздела
+  let cur = -1; secs.forEach((s, i) => { if (s && geo.tops.get(s) - top < geo.vh * .4) cur = i; });
+  if (cur !== navCur) {
+    links.forEach((a, i) => a.classList.toggle('is-active', i === cur));
+    pageLinks.forEach(a => a.classList.toggle('is-active', cur === -1));
+    navCur = cur;
+  }
 }
 // не чаще одного раза за кадр
 addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
@@ -280,6 +286,48 @@ document.querySelectorAll('.g').forEach(g => g.addEventListener('click', () => {
 // ---------- Скриншоты сайтов: высота окна для прокрутки при наведении ----------
 const setSh = () => document.querySelectorAll('.site__scroll').forEach(b => b.style.setProperty('--sh', b.clientHeight + 'px'));
 setSh(); addEventListener('resize', setSh);
+
+// ---------- Клиенты: превью работ за курсором ----------
+if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  const cells = document.querySelectorAll('a.client[data-previews]');
+  if (cells.length) {
+    const box = document.createElement('div'); box.className = 'cprev'; box.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(box);
+    let tx = 0, ty = 0, x = 0, y = 0, raf = 0, timer = 0, active = null;
+    const loop = () => {
+      x += (tx - x) * .18; y += (ty - y) * .18;
+      box.style.transform = `translate3d(${x + 22}px,${y - 140}px,0) rotate(${Math.max(-6, Math.min(6, (tx - x) * .05))}deg)`;
+      raf = active ? requestAnimationFrame(loop) : 0;
+    };
+    cells.forEach(cell => {
+      cell.addEventListener('pointerenter', e => {
+        active = cell; clearInterval(timer);
+        const list = cell.dataset.previews.split(',').filter(Boolean);
+        if (list.length) {
+          box.innerHTML = list.map((src, i) => `<img src="${src}" alt=""${i ? '' : ' class="is-cur"'}>`).join('') +
+            (list.length > 1 ? `<span class="cprev__count">1 / ${list.length}</span>` : '');
+          let i = 0;
+          if (list.length > 1) timer = setInterval(() => {
+            const imgs = box.querySelectorAll('img'); imgs[i].classList.remove('is-cur');
+            i = (i + 1) % imgs.length; imgs[i].classList.add('is-cur');
+            box.querySelector('.cprev__count').textContent = `${i + 1} / ${imgs.length}`;
+          }, 850);
+        } else {
+          box.innerHTML = `<div class="cprev__note"><small></small><span></span></div>`;
+          box.querySelector('small').textContent = cell.dataset.note || '';
+          box.querySelector('span').textContent = cell.querySelector('span').textContent;
+        }
+        if (!raf) { x = tx = e.clientX; y = ty = e.clientY; raf = requestAnimationFrame(loop); }
+        box.classList.add('is-on'); box.style.scale = '1';
+      });
+      cell.addEventListener('pointermove', e => { tx = e.clientX; ty = e.clientY; });
+      cell.addEventListener('pointerleave', () => {
+        if (active === cell) { active = null; clearInterval(timer); box.classList.remove('is-on'); box.style.scale = '.85'; }
+      });
+    });
+    addEventListener('scroll', () => { if (active) { active = null; clearInterval(timer); box.classList.remove('is-on'); } }, { passive: true });
+  }
+}
 
 // ---------- Мобильное меню ----------
 const burger = document.querySelector('.nav__burger'), menu = document.getElementById('menu');
