@@ -15,6 +15,7 @@ SVC = {s["slug"]: s["title"] for s in SERVICES}
 # img: файл из media/img без .jpg; видео — с .mp4 (из media/video)
 PROJECTS = [
     dict(slug="mbank", name="MBANK", tag="Банк · финтех", period="фев — апр 2026", role="Графический дизайнер, PR & Marketing", fmt="В штате",
+         cover="mbank-cover",
          lead="Банк и мобильное приложение MBANK. В департаменте PR & Marketing отвечал за визуал продуктовых кампаний — от сторис и баннеров для сайта до прероллов и LED-экранов.",
          did=[("MIslamic", "Кампания «Берешен Рамазан» с кешбэком 10%, карта MIslamic, мурабаха — статика, адаптации и прероллы."),
               ("MPay и MBusiness", "NFC-стикер, оплата по QR, кешбэк MPay, онлайн-переводы по Visa для бизнеса."),
@@ -160,7 +161,9 @@ def page(p, nxt):
     did = "\n".join(f'      <div class="list__item rv"><span class="mono">{i + 1:02d}</span><h3>{t}</h3><p>{d}</p></div>' for i, (t, d) in enumerate(p["did"]))
     gal = "\n".join(f'      <figure class="g rv">{media(f)}<figcaption><b>{p["name"]}</b><span></span></figcaption></figure>' for f in p["gallery"])
     svc = "".join(f'<a href="../services/{s}.html">{SVC[s]} ↗</a>' for s in p["services"])
-    hero = media(p["gallery"][0]) if p["gallery"] else ""
+    # cover — отдельная обложка целиком, без обрезки; иначе первая работа из галереи
+    hero = media(p["cover"]) if p.get("cover") else (media(p["gallery"][0]) if p["gallery"] else "")
+    hero_cls = "s-media s-media--cover" if p.get("cover") else "s-media"
     works_block = f'''<section class="section" data-ruler="Работы">
   <div class="wrap">
     <div class="eyebrow mono"><b>B</b>/ Работы</div>
@@ -229,7 +232,7 @@ def page(p, nxt):
       </div>
     </div>
     <div class="facts rv">{facts_html}</div>
-    {f'<div class="s-media rv">{hero}</div>' if hero else ''}
+    {f'<div class="{hero_cls} rv">{hero}</div>' if hero else ''}
   </div>
 </section>
 
