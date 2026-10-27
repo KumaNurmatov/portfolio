@@ -550,3 +550,15 @@ a.client:hover .client__arr{opacity:1;transform:none;color:var(--accent-2)}
 /* обложка проекта целиком, без кадрирования */
 .s-media--cover{aspect-ratio:auto}
 .s-media--cover>*{position:static;width:100%;height:auto}
+
+/* ---------- Работы по форматам: ровные ряды одной пропорции ---------- */
+.set + .set{margin-top:clamp(48px,6vw,80px)}
+.set .g-group{margin-top:0}
+.set-grid{display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:14px}
+.g--fix{margin:0;break-inside:auto}
+.g--fix>img,.g--fix>video{width:100%;height:auto;aspect-ratio:var(--ar);object-fit:cover;display:block}
+.g--fix figcaption{padding-top:8px}
+.g--fix figcaption b{font-weight:500;color:var(--fg-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+@media (max-width:1100px){.set-grid[style*="--cols:5"],.set-grid[style*="--cols:4"]{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:760px){.set-grid{grid-template-columns:repeat(2,1fr);gap:10px}.set-grid[style*="--cols:2"]{grid-template-columns:1fr}}
+.g--span{grid-column:1/-1}

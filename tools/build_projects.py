@@ -23,6 +23,10 @@ PROJECTS = [
               ("MTravel", "Распродажи Jazeera Airways и новые направления: сторис и баннеры."),
               ("Сервисные сообщения", "Техработы, плановые обновления, приглашения — единый узнаваемый стиль."),
               ("Моушн и ИИ", "Прероллы, LED-ролики и ИИ-видео для ОСАГО.")],
+         sets=[("Сторис", "9:16 · кампании для Instagram и приложения", "9/16", 5, [("mbf-s0", "Онлайн-кредит"), ("mbf-s1", "Цифровая ипотека"), ("mbf-s2", "MIslamic"), ("mbf-s5", "MIslamic"), ("mbf-s12", "MPay"), ("mbf-s15", "АДАЛ"), ("mbf-s16", "Автокредит"), ("mbf-s18", "Бизнес без паузы"), ("mbf-s19", "MTravel"), ("mbf-s22", "MTravel"), ("mbf-s25", "MTravel"), ("mbf-s26", "ОСАГО"), ("mbf-s27", "Тонировка онлайн"), ("mbf-s28", "MBusiness × Visa"), ("mbf-s29", "кредитный потенциал"), ("mbf-s30", "онлайн ипотека"), ("mbf-s31", "онлайн ипотека"), ("mbf-s32", "онлайн ипотека"), ("mbf-s33", "Приглашения"), ("mbf-s35", "Приглашения"), ("mbf-s38", "Возврат средств"), ("mbf-s39", "Возврат средств"), ("mbf-s42", "Техработы"), ("mbf-s43", "Техработы"), ("mbf-s44", "Техработы")]),
+               ("Посты", "4:5 · лента и таргет", "4/5", 4, [("mbf-p2", "MIslamic"), ("mbf-p4", "MIslamic"), ("mbf-p5", "MPay"), ("mbf-p6", "MPay"), ("mbf-p7", "MPay"), ("mbf-p8", "MPay"), ("mbf-p9", "MPay"), ("mbf-p11", "АДАЛ"), ("mbf-p14", "Автокредит"), ("mbf-p15", "Бизнес без паузы"), ("mbf-p16", "MTravel"), ("mbf-p19", "MTravel"), ("mbf-p21", "Обновление приложения"), ("mbf-p26", "Тонировка онлайн"), ("mbf-p27", "Тонировка онлайн"), ("mbf-p29", "Тонировка онлайн"), ("mbf-p31", "MBusiness × Visa"), ("mbf-p33", "Возврат средств"), ("mbf-p34", "Возврат средств"), ("mbf-p35", "Возврат средств"), ("mbf-p36", "кредитный потенциал"), ("mbf-p37", "онлайн ипотека"), ("mbf-p40", "Переводы в Турцию"), ("mbank-osago.mp4", "ОСАГО · ИИ-видео")]),
+               ("Баннеры и видео", "сайт, приложение, прероллы", "1.85/1", 2, [("mbank-islamic.mp4", "MIslamic · преролл", "span"), ("mbf-w8", "MBusiness × Visa"), ("mbf-w1", "MIslamic"), ("mbf-w2", "MIslamic"), ("mbf-w18", "Возврат средств")]),
+               ("Веб-баннеры", "сайт и партнёрские площадки", "3.1/1", 2, [("mbf-b0", "MIslamic"), ("mbf-b8", "MIslamic"), ("mbf-b16", "Тонировка онлайн"), ("mbf-b12", "MPay")])],
          gallery=["mbank-islamic.mp4", "mb-26", "mb-30", "mbank-osago.mp4", "mb-04", "mb-12", "mb-31", "mb-36", "mb-22", "mb-38", "mb-01",
                   "mb-07", "mb-17", "mb-28", "mb-33", "mb-41", "mb-15", "mb-24", "mbank-nfc", "mbank-adal", "mb-19", "mb-09", "mb-43", "mb-34"],
          services=["ads", "motion", "ai", "smm"], previews=["mb-26", "mbank-islamic", "mb-12", "mb-31", "mb-36"]),
@@ -164,7 +168,24 @@ def page(p, nxt):
     # cover — отдельная обложка целиком, без обрезки; иначе первая работа из галереи
     hero = media(p["cover"]) if p.get("cover") else (media(p["gallery"][0]) if p["gallery"] else "")
     hero_cls = "s-media s-media--cover" if p.get("cover") else "s-media"
+    if p.get("sets"):
+        parts = []
+        for title, note, ar, cols, items in p["sets"]:
+            figs = "\n".join(f'        <figure class="g g--fix{" g--span" if opt else ""} rv">{media(f)}<figcaption><b>{c}</b></figcaption></figure>'
+                             for f, c, *opt in items)
+            parts.append(f'''    <div class="set">
+      <h3 class="g-group"><span>{title}</span><small class="mono">{note} · {len(items)}</small></h3>
+      <div class="set-grid" style="--ar:{ar};--cols:{cols}">
+{figs}
+      </div>
+    </div>''')
+        sets_html = "\n".join(parts)
     works_block = f'''<section class="section" data-ruler="Работы">
+  <div class="wrap">
+    <div class="eyebrow mono"><b>B</b>/ Работы</div>
+{sets_html}
+  </div>
+</section>''' if p.get("sets") else f'''<section class="section" data-ruler="Работы">
   <div class="wrap">
     <div class="eyebrow mono"><b>B</b>/ Работы</div>
     <div class="gallery">
