@@ -562,3 +562,5 @@ a.client:hover .client__arr{opacity:1;transform:none;color:var(--accent-2)}
 @media (max-width:1100px){.set-grid[style*="--cols:5"],.set-grid[style*="--cols:4"]{grid-template-columns:repeat(3,1fr)}}
 @media (max-width:760px){.set-grid{grid-template-columns:repeat(2,1fr);gap:10px}.set-grid[style*="--cols:2"]{grid-template-columns:1fr}}
 .g--span{grid-column:1/-1}
+@media (max-width:1100px){.set-grid[style*="--cols:8"]{grid-template-columns:repeat(4,1fr)}}
+@media (max-width:760px){.set-grid[style*="--cols:8"]{grid-template-columns:repeat(2,1fr)}}
