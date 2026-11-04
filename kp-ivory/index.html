@@ -1,0 +1,964 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"></head><body>
+<title>IVORY 3D для Borsan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Презентация для живой встречи с ноутбука: один экран — одна мысль, листается стрелками. Только Helvetica, только оттенки айвори, скруглённые блоки. */
+:root{
+  --ivory:#F6F1E7; --ivory2:#EDE5D6; --sand:#D8CBB3; --umber:#756041; --mute:#6C6252; --ink:#2A241B; --paper:#FFFDF8;
+  --f:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  --g:clamp(20px,4.4vw,80px);
+  --r:18px; --r-s:10px;
+  --t-xl:clamp(38px,4.8vw,78px); --t-l:clamp(26px,2.9vw,46px); --t-m:clamp(18px,1.45vw,23px); --t-s:clamp(15px,1.1vw,18px); --t-xs:clamp(13px,.92vw,15px);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:var(--ivory)}
+body{margin:0;background:var(--ivory);color:var(--ink);font:400 var(--t-s)/1.45 var(--f);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3,p,ul,ol{margin:0;padding:0}
+ul,ol{list-style:none}
+h1,h2{font-weight:500;letter-spacing:-.025em;line-height:1.08;text-wrap:balance}
+h1{font-size:var(--t-xl)} h2{font-size:var(--t-l)}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--umber);outline-offset:3px}
+img{display:block;max-width:100%}
+.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.s{position:relative;min-height:100svh;padding-block:clamp(56px,8vh,88px);padding-left:max(var(--g),env(safe-area-inset-left,0px));padding-right:max(var(--g),env(safe-area-inset-right,0px));display:flex;flex-direction:column;justify-content:center;gap:clamp(24px,4vh,44px)}
+.s--alt{background:var(--ivory2)}
+.eyebrow{font-size:var(--t-xs);color:var(--umber)}
+.head{display:grid;gap:8px}
+
+/* служебное: счётчик экранов и стрелки */
+.cnt{position:fixed;z-index:20;right:max(var(--g),env(safe-area-inset-right,0px));top:calc(16px + env(safe-area-inset-top,0px));font-size:var(--t-xs);color:var(--mute);pointer-events:none}
+.pager{position:fixed;z-index:20;right:max(var(--g),env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;gap:6px}
+.pager button{width:40px;height:40px;display:grid;place-items:center;background:var(--paper);border-radius:50%;color:var(--ink);transition:background .2s,color .2s}
+.pager button:hover{background:var(--ink);color:var(--ivory)}
+.prog{position:fixed;z-index:21;left:0;top:0;height:2px;width:100%;background:var(--umber);transform-origin:0 0;transform:scaleX(0);transition:transform .3s}
+
+/* появление: элементы видимы и без анимации, класс .go только проигрывает вход */
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.go [data-r]{animation:up .7s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0)*90ms)}
+
+/* обложка: рендер до центра, справа текст на цвете его неба */
+#cover{padding:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0;color:var(--ink);overflow:hidden;background:linear-gradient(180deg,#dbdfe3 0,#e0e4e7 25%,#e8e9eb 50%,#e9eaec 75%,#f1f1f1 100%)}
+#cover .bg{width:100%;height:100%;min-height:0;object-fit:cover;object-position:left center;-webkit-mask-image:linear-gradient(90deg,#000 92%,transparent);mask-image:linear-gradient(90deg,#000 92%,transparent)}
+#cover .in{align-self:center;display:grid;gap:14px;padding-block:80px;padding-left:clamp(20px,3.4vw,64px);padding-right:max(var(--g),env(safe-area-inset-right,0px))}
+#cover .eyebrow{color:var(--mute)}
+
+/* решение */
+.idea{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(24px,4vw,72px);align-items:center}
+.idea>*{min-width:0}
+.idea img{width:100%;max-height:74vh;object-fit:contain}
+
+/* живое демо и лента планировок */
+#demo{gap:14px;padding-block:clamp(28px,4vh,44px) clamp(20px,3vh,32px);justify-content:flex-start;height:100svh}
+.demo__top{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-right:64px}
+.seg{display:inline-flex;background:var(--ivory2);border-radius:999px;padding:4px;gap:2px}
+.seg button{padding:.42em 1.25em;border-radius:999px;font-weight:500;transition:background .2s,color .2s}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--ivory)}
+.seg.off{opacity:.4}
+.stage{position:relative;flex:1 1 0;min-height:240px;background:var(--ivory2);border-radius:var(--r);overflow:hidden}
+.stage>div{position:absolute;inset:0}
+.stage .iv3d{aspect-ratio:auto;min-height:0;border-radius:0;height:100%}
+.planv{background:var(--paper);display:flex;align-items:center;justify-content:center;padding:clamp(12px,2vh,24px)}
+.planv[hidden]{display:none}
+.planv img{height:100%;width:100%;object-fit:contain;mix-blend-mode:multiply}
+.planv span{position:absolute;left:16px;top:16px;background:var(--ink);color:var(--ivory);font-size:var(--t-xs);padding:.45em .9em;border-radius:999px}
+.rib{display:grid;grid-template-columns:repeat(17,minmax(64px,1fr));gap:6px;overflow-x:auto;padding:2px 2px 4px;margin-right:92px;scrollbar-width:none}
+.rib::-webkit-scrollbar{display:none}
+.t{display:grid;gap:3px;text-align:center;font-size:12.5px;line-height:1.2;color:var(--mute);min-width:0}
+.t span.p{position:relative;display:block;aspect-ratio:1;background:var(--paper);border-radius:var(--r-s);overflow:hidden;outline:2px solid transparent;outline-offset:-2px;transition:outline-color .15s}
+.t img{width:100%;height:100%;object-fit:contain;padding:9%;mix-blend-mode:multiply;transition:transform .3s}
+.t:hover img{transform:scale(1.08)}
+.t[aria-pressed=true]{color:var(--ink);font-weight:500}
+.t[aria-pressed=true] span.p{outline-color:var(--ink)}
+.t b{font-weight:inherit;white-space:nowrap}
+
+/* ролики: окно обрезает кадр */
+.vc{position:relative;overflow:hidden;background:#1d1912;width:100%;border-radius:var(--r)}
+.vc video{position:absolute;display:block;max-width:none}
+.tag{position:absolute;z-index:1;right:14px;top:14px;background:var(--ivory);color:var(--ink);font-size:var(--t-s);font-weight:500;padding:.4em .95em;border-radius:999px}
+.pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.pair>*{min-width:0}
+
+/* цена без скидки */
+.rows{display:grid}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:baseline;padding:clamp(14px,2.4vh,24px) 0;border-bottom:1px solid var(--sand);font-size:var(--t-m);line-height:1.2}
+.row small{display:block;font-size:var(--t-xs);color:var(--mute);margin-top:.3em}
+.row--sum{border-bottom:0;font-size:var(--t-l);font-weight:500;letter-spacing:-.02em}
+.row>*{min-width:0}
+.fix{align-self:flex-start;background:var(--ink);color:var(--ivory);font-size:var(--t-s);padding:.55em 1.1em;border-radius:999px}
+
+/* предложение: две карточки */
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.card{border-radius:var(--r);padding:clamp(22px,3vw,44px);display:flex;flex-direction:column;gap:clamp(10px,1.8vh,16px);min-height:min(58vh,520px);min-width:0;position:relative}
+.card--a{background:var(--ivory2)}
+.card--b{background:var(--ink);color:var(--ivory)}
+.card__l{font-size:var(--t-m)}
+.price{font-size:clamp(46px,6vw,100px);font-weight:500;letter-spacing:-.035em;line-height:1;margin-top:auto}
+.price small{font-size:.3em;letter-spacing:0;font-weight:400}
+.card__n{color:var(--mute);min-height:1.5em}
+.card--b .card__n{color:var(--sand)}
+.off{position:absolute;right:clamp(22px,3vw,44px);top:clamp(22px,3vw,44px);background:var(--ink);color:var(--ivory);font-size:var(--t-s);font-weight:500;padding:.3em .8em;border-radius:999px}
+.sw{position:absolute;right:clamp(22px,3vw,44px);top:clamp(20px,3vw,42px);width:64px;height:36px;border-radius:999px;background:rgba(246,241,231,.2);transition:background .25s}
+.sw::after{content:"";position:absolute;left:4px;top:4px;width:28px;height:28px;border-radius:50%;background:var(--ivory);transition:transform .28s cubic-bezier(.3,1.4,.5,1)}
+.sw[aria-pressed=true]{background:var(--sand)}
+.sw[aria-pressed=true]::after{transform:translateX(28px);background:var(--ink)}
+.gift{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--ivory);color:var(--ink);border-radius:14px;padding:12px 16px;font-size:var(--t-m);font-weight:500;visibility:hidden}
+.gift svg{width:38px;height:38px;flex:none;color:var(--umber)}
+.gift i{margin-left:auto;font-style:normal}
+.gift--on{visibility:visible;background:var(--ivory);min-height:62px}
+.iso{position:absolute;left:50%;top:clamp(56px,9vh,84px);transform:translateX(-50%);height:calc(100% - clamp(290px,41vh,380px));width:auto;max-width:82%;object-fit:contain;mix-blend-mode:multiply}
+.card--b.on .gift{visibility:visible;animation:gift .6s cubic-bezier(.2,1.5,.4,1) both}
+.card--b.on .gift .lid{transform-origin:24px 18px;animation:lid 1s .5s ease-in-out both}
+@keyframes gift{from{opacity:0;transform:translateY(14px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes lid{0%,100%{transform:none}30%{transform:translateY(-5px) rotate(-7deg)}60%{transform:translateY(-3px) rotate(5deg)}}
+
+/* бонус */
+.bento{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,4fr) minmax(0,4fr);gap:12px}
+.b{position:relative;border-radius:var(--r);background:var(--ivory);padding:clamp(18px,2.2vw,32px);min-height:min(46vh,420px);display:flex;flex-direction:column;justify-content:flex-end;gap:4px;overflow:hidden;min-width:0}
+.b big{font-size:clamp(52px,6.4vw,104px);font-weight:500;letter-spacing:-.035em;line-height:1}
+.b p{font-size:var(--t-m);line-height:1.2}
+.b small{font-size:var(--t-xs);color:var(--mute)}
+.b--img{color:#fff}
+.b--img img,.b--img video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.b--img::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(30,24,16,0) 20%,rgba(30,24,16,.55) 55%,rgba(30,24,16,.85) 100%)}
+.b--img>*:not(img):not(video){position:relative;z-index:1}
+.b--img small{color:#fff}
+.b--ink{background:var(--ink);color:var(--ivory)}
+.b--ink small{color:var(--sand)}
+.worth{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:6px 20px;font-size:var(--t-m)}
+.worth b{font-weight:500;font-size:var(--t-l);letter-spacing:-.02em}
+
+/* сроки */
+.tl{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.tl li{background:var(--ivory2);border-radius:var(--r);padding:clamp(16px,2vw,28px);min-width:0;display:grid;gap:6px;align-content:start;min-height:min(30vh,260px)}
+.tl li:last-child{background:var(--ink);color:var(--ivory)}
+.tl li:last-child span,.tl li:last-child p{color:var(--sand)}
+.tl span{font-size:var(--t-xs);color:var(--umber)}
+.tl b{font-weight:500;font-size:var(--t-l);letter-spacing:-.02em;line-height:1.1}
+.tl p{color:var(--mute)}
+
+/* перспектива */
+.fut{display:grid;grid-template-columns:minmax(0,8fr) minmax(0,4fr);gap:clamp(20px,3vw,48px);align-items:center}
+.fut>*{min-width:0}
+.fut__txt{display:grid;gap:14px}
+.modes{display:flex;flex-wrap:wrap;gap:6px}
+.modes button{padding:.45em 1em;border-radius:999px;background:var(--ivory2);transition:background .2s,color .2s}
+.modes button[aria-pressed=true]{background:var(--ink);color:var(--ivory)}
+#modeT{font-size:var(--t-m);line-height:1.25}
+
+/* финал */
+#next ol{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;counter-reset:n}
+#next ol li{counter-increment:n;background:var(--ink);color:var(--ivory);border-radius:var(--r);padding:clamp(20px,2.4vw,36px);display:grid;gap:clamp(28px,6vh,64px);align-content:space-between;font-size:clamp(20px,1.8vw,28px);font-weight:500;letter-spacing:-.012em;line-height:1.25;min-width:0}
+#next ol li::before{content:counter(n);color:var(--sand);font-size:var(--t-l);font-weight:500}
+
+/* на широком экране блоки заполняют экран целиком, без пустых полей */
+@media (min-width:861px){
+  #cover{height:100svh;grid-template-rows:minmax(0,1fr)}
+  #price,#offer,#bonus{justify-content:flex-start}
+  .rows,.cards,.bento{flex:1 1 auto;min-height:0}
+  .rows{grid-auto-rows:1fr}
+  .row{align-items:center;font-size:clamp(20px,2vw,32px)}
+  .row--sum{font-size:var(--t-xl)}
+  .tl li{display:flex;flex-direction:column}
+  .tl li span{margin-bottom:auto}
+}
+@media (max-width:860px){
+  .s{min-height:auto;justify-content:flex-start}
+  #cover{grid-template-columns:minmax(0,1fr);min-height:auto}
+  #cover .bg{height:62svh;-webkit-mask-image:none;mask-image:none}
+  #cover .in{padding-block:28px 40px;padding-left:max(var(--g),env(safe-area-inset-left,0px))}
+  #demo{height:auto}
+  .stage{flex:none;height:62svh}
+  .rib{margin-right:0}
+  .idea,.cards,.fut,.bento,.pair,#next ol{grid-template-columns:minmax(0,1fr)}
+  .tl{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .card,.b{min-height:0}
+  .iso{position:static;transform:none;height:auto;max-width:100%}
+  .b{min-height:220px}
+  .demo__top{padding-right:0}
+  .pager{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+
+<div class="prog" id="prog"></div>
+<span class="cnt num" id="cnt">1 / 10</span>
+<div class="pager"><button id="pv" aria-label="Предыдущий экран"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 11.5 9 5.5l6 6"/></svg></button><button id="nx" aria-label="Следующий экран"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6.5l6 6 6-6"/></svg></button></div>
+
+<section class="s" id="cover">
+  <img class="bg" data-a="cover.jpg" alt="ЖК IVORY">
+  <div class="in">
+    <p class="eyebrow" data-r>Коммерческое предложение для Borsan Construction</p>
+    <h1 data-r style="--i:1">3D квартиры на сайте</h1>
+  </div>
+</section>
+
+<section class="s" id="idea">
+  <div class="idea">
+    <h2 data-r>Покупатель сам ходит по квартире прямо на сайте, без приложений</h2>
+    <img data-r style="--i:1" data-a="model.png" alt="3D-модель квартиры">
+  </div>
+</section>
+
+<section class="s" id="demo">
+  <div class="demo__top">
+    <h2>Попробуйте сами</h2>
+    <div class="seg" id="seg" role="group" aria-label="Режим просмотра">
+      <button id="b3d" aria-pressed="true">3D</button><button id="b360" aria-pressed="false">360°</button>
+    </div>
+  </div>
+  <div class="stage" id="stage">
+    <div id="m3d"></div><div id="m360" hidden></div>
+    <div class="planv" id="planv" hidden><img id="planImg" alt="Планировка"><span>Будет в 3D</span></div>
+  </div>
+  <div class="rib" id="rib"></div>
+</section>
+
+<section class="s s--alt" id="price">
+  <div class="head">
+    <p class="eyebrow" data-r>Цена без скидки</p>
+    <h2 data-r style="--i:1">Сколько это стоит</h2>
+  </div>
+  <div class="rows" data-r style="--i:2">
+    <div class="row"><span>3D-модели на сайте<small>17 планировок × ≈14 700 сом</small></span><span class="num">250 000 сом</span></div>
+    <div class="row"><span>Панорамы 360°<small>17 планировок × 6 000 сом</small></span><span class="num">102 000 сом</span></div>
+    <div class="row row--sum"><span>Итого</span><span class="num">352 000 сом</span></div>
+  </div>
+  <p class="fix" data-r style="--i:3">Фиксированная цена за планировку, не за м²</p>
+</section>
+
+<section class="s" id="offer">
+  <div class="cards">
+    <div class="card card--a" data-r>
+      <p class="card__l">3D для 17 планировок</p>
+      <span class="off">−40%</span>
+      <p class="price num">150 000 <small>сом</small></p>
+      <p class="card__n"><span class="num">8 800 сом</span> за планировку вместо <span class="num">14 700</span></p>
+      <img class="iso" data-a="iso.jpg" alt="Планировка в изометрии">
+      <p class="gift gift--on">+ 17 планировок сверху и в изометрии</p>
+    </div>
+    <div class="card card--b" id="cardB" data-r style="--i:1">
+      <p class="card__l">+ 360° и бонус</p>
+      <button class="sw" id="sw" aria-pressed="false" aria-label="Добавить 360° и бонус"></button>
+      <p class="price num">+80 000 <small>сом</small></p>
+      <p class="card__n" id="sum">Панорамы всех планировок</p>
+      <button class="gift" id="gift" tabindex="-1">
+        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M9 22v19h30V22"/><path d="M24 22v19"/><g class="lid"><path d="M6 14h36v8H6z"/><path d="M24 14v8"/><path d="M24 14c-3-8-13-9-13-3 0 3 6 3 13 3zM24 14c3-8 13-9 13-3 0 3-6 3-13 3z"/></g></svg>
+        Бонус в подарок<i>→</i>
+      </button>
+    </div>
+  </div>
+</section>
+
+<section class="s s--alt" id="bonus">
+  <div class="head">
+    <p class="eyebrow" data-r>Бонус при +80 000 сом</p>
+    <h2 data-r style="--i:1">Контент для рекламы в подарок</h2>
+  </div>
+  <div class="bento" data-r style="--i:2">
+    <div class="b b--img"><img data-a="hero.jpg" alt=""><big>20</big><p>визуализаций</p><small>Нужна 3D-модель дома</small></div>
+    <div class="b b--img" id="promo"><video muted loop playsinline></video><big>60–90 с</big><p>видеопрезентация объекта</p><small>Токены на генерацию ваши</small></div>
+    <div class="b b--ink"><big>3</big><p>вертикальных ролика</p><small>Instagram и TikTok</small></div>
+  </div>
+  <div class="worth" data-r style="--i:3"><span>Рыночная стоимость</span><b class="num">120 000–200 000 сом</b></div>
+</section>
+
+<section class="s" id="time">
+  <h2 data-r>4–5 недель, первые квартиры на сайте через 2</h2>
+  <ol class="tl" data-r style="--i:1">
+    <li><span>Неделя 1</span><b>Старт</b><p>Чертежи, стиль, аванс</p></li>
+    <li><span>Неделя 2</span><b>Первые 5</b><p>Самые продаваемые</p></li>
+    <li><span>Недели 3–4</span><b>Ещё 12</b><p>Все остальные</p></li>
+    <li><span>Неделя 5</span><b>Сдача</b><p>Правки и проверка</p></li>
+  </ol>
+</section>
+
+<section class="s s--alt" id="teaser">
+  <div class="head">
+    <p class="eyebrow" data-r>Дальнейшая перспектива</p>
+    <h2 data-r style="--i:1">Интерактивный 3D-макет всего ЖК</h2>
+  </div>
+  <div class="pair" data-r style="--i:1">
+    <div class="vc" data-v="floorT"></div>
+    <div class="vc" data-v="aerialT"></div>
+  </div>
+</section>
+
+<section class="s" id="future">
+  <div class="head">
+    <p class="eyebrow" data-r>Дальнейшая перспектива, отдельный проект</p>
+    <h2 data-r style="--i:1">Следующий шаг: весь IVORY на Unreal Engine</h2>
+  </div>
+  <div class="fut" data-r style="--i:1">
+    <div class="vc" id="futV"><span class="tag">В перспективе</span></div>
+    <div class="fut__txt">
+      <div class="modes" id="modes" role="group" aria-label="Режимы презентации"></div>
+      <p id="modeT"></p>
+    </div>
+  </div>
+</section>
+
+<section class="s s--alt" id="next">
+  <h2 data-r>Первые квартиры на сайте через 2 недели после старта</h2>
+  <ol data-r style="--i:1">
+    <li><span>Выбираем вариант: <span class="num">150 000 сом</span> или <span class="num">230 000 сом</span> с 360° и бонусом</span></li>
+    <li><span>Получаем чертежи и согласуем стиль интерьера</span></li>
+    <li><span>Договор и аванс <span class="num">75 000 сом</span>, остаток при сдаче</span></li>
+  </ol>
+</section>
+
+<script src="assets/three-bundle.js"></script>
+<script>window.KPA=function(n){return "assets/"+n}</script>
+<script>/* IVORY 3D-просмотрщик квартиры. Монтируется в каждый .iv3d[data-src], three.js грузится с jsDelivr по требованию. */
+(function () {
+  if (window.IV3D) return;
+  var V = '0.160.0', CDN = 'https://cdn.jsdelivr.net/npm/three@' + V;
+
+  var CSS = '' +
+    '.iv3d{position:relative;width:100%;aspect-ratio:16/10;min-height:320px;background:#EDE7D9;border-radius:4px;overflow:hidden;' +
+    'font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;color:#6B6355;user-select:none;-webkit-user-select:none;touch-action:none}' +
+    '.iv3d canvas{display:block;width:100%!important;height:100%!important;cursor:grab}' +
+    '.iv3d canvas:active{cursor:grabbing}' +
+    '.iv3d__load{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;' +
+    'background:#EDE7D9;transition:opacity .5s;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#8B7355}' +
+    '.iv3d__bar{width:160px;height:1px;background:#D9D0C0;position:relative;overflow:hidden}' +
+    '.iv3d__bar i{position:absolute;left:0;top:0;bottom:0;width:0;background:#8B7355;transition:width .2s}' +
+    '.iv3d__rooms{position:absolute;left:16px;right:16px;bottom:16px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;pointer-events:none}' +
+    '.iv3d__rooms button{pointer-events:auto;font:500 11px/1 \'Helvetica Neue\',Helvetica,Arial,sans-serif;letter-spacing:.06em;color:#6B6355;' +
+    'background:rgba(255,255,255,.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid #D9D0C0;' +
+    'border-radius:999px;padding:9px 14px;cursor:pointer;transition:background .2s,color .2s,border-color .2s}' +
+    '.iv3d__rooms button span{opacity:.6;margin-left:6px;font-weight:400}' +
+    '.iv3d__rooms button.is-on{background:#8B7355;border-color:#8B7355;color:#fff}' +
+    '.iv3d__hint{position:absolute;top:14px;left:50%;transform:translateX(-50%);font-size:11px;letter-spacing:.05em;' +
+    'background:rgba(255,255,255,.75);border-radius:999px;padding:7px 12px;transition:opacity .6s;pointer-events:none;white-space:nowrap}' +
+    '.iv3d__tag{position:absolute;left:0;top:0;transform:translate(-50%,-50%);pointer-events:none;text-align:center;' +
+    'font-size:11px;font-weight:600;letter-spacing:.04em;color:#2C2416;background:rgba(255,255,255,.85);border-radius:3px;' +
+    'padding:4px 7px;white-space:nowrap;transition:opacity .3s}' +
+    '.iv3d.is-room .iv3d__tag{visibility:hidden}' +
+    '.iv3d__tag small{display:block;font-weight:400;color:#8B7355;font-size:10px;margin-top:1px}' +
+    '@media (max-width:640px){.iv3d{aspect-ratio:4/5}.iv3d__rooms button{padding:8px 11px;font-size:10px}}' +
+    /* телефон: кнопки комнат в одну строку с горизонтальной прокруткой, правый край мягко гаснет */
+    '@media (max-width:768px){.iv3d__rooms{left:0;right:0;bottom:12px;flex-wrap:nowrap;justify-content:flex-start;' +
+    'overflow-x:auto;padding:2px 12px;pointer-events:auto;touch-action:pan-x;scrollbar-width:none;-webkit-overflow-scrolling:touch;' +
+    '-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}' +
+    '.iv3d__rooms::-webkit-scrollbar{display:none}.iv3d__rooms button{flex:0 0 auto}.iv3d__rooms button:last-child{margin-right:28px}}';
+
+  // комнаты в координатах Blender (x, y) → в three это (x, 0, -y)
+  var ROOMS = [
+    { id: 'all', name: 'Вся квартира' },
+    { id: 'living', name: 'Кухня-гостиная', area: '14,34', c: [3.0, 3.5], dist: 6.5, dir: [0.55, 1], cut: 1.0 },
+    { id: 'bedroom', name: 'Спальня', area: '13,42', c: [2.8, 6.85], dist: 6.2, cut: 1.0 },
+    { id: 'hall', name: 'Холл', area: '16,09', c: [7.8, 4.3], dist: 6.8, cut: 1.2 },
+    { id: 'bath', name: 'Санузел', area: '4,63', c: [6.4, 1.4], dist: 4.6, dir: [0.15, 1], cut: 0.4 }
+  ];
+
+  var libs = null;
+  function loadLibs() {
+    if (!libs) libs = Promise.resolve(window.KP3);
+    return libs;
+  }
+
+  /* GLB, упакованный в PNG (ivory-3d/pack.py): Тильда хранит только картинки.
+     3 байта на пиксель RGB, первые 4 байта — длина данных. */
+  function unpackPng(url, progress) {
+    return fetch(url, { mode: 'cors' }).then(function (res) {
+      var total = +res.headers.get('content-length') || 0, got = 0, parts = [], rd = res.body && res.body.getReader();
+      if (!rd) return res.blob();
+      return (function pump() {
+        return rd.read().then(function (r) {
+          if (r.done) return new Blob(parts, { type: 'image/png' });
+          parts.push(r.value); got += r.value.length;
+          progress({ loaded: got, total: total });
+          return pump();
+        });
+      })();
+    }).then(function (blob) {
+      return createImageBitmap(blob, { premultiplyAlpha: 'none', colorSpaceConversion: 'none' });
+    }).then(function (bmp) {
+      var c = document.createElement('canvas'); c.width = bmp.width; c.height = bmp.height;
+      var ctx = c.getContext('2d', { willReadFrequently: true }); ctx.drawImage(bmp, 0, 0);
+      var px = ctx.getImageData(0, 0, c.width, c.height).data, n = px.length / 4, rgb = new Uint8Array(n * 3);
+      for (var i = 0, j = 0; i < px.length; i += 4) { rgb[j++] = px[i]; rgb[j++] = px[i + 1]; rgb[j++] = px[i + 2]; }
+      var len = ((rgb[0] << 24) >>> 0) + (rgb[1] << 16) + (rgb[2] << 8) + rgb[3];
+      return rgb.buffer.slice(4, 4 + len);
+    });
+  }
+
+  /* Разрез при осмотре комнаты: всё в конструкции (стены, срезы, окна), что стоит между камерой и центром
+     комнаты выше пола, рисуется вторым проходом полупрозрачным. uDir — направление от комнаты к камере в плане,
+     uOff — на сколько метров от центра начинается «передняя» зона, uOn — сила эффекта 0..1 (плавно). */
+  function cutaway(mat, U, ghost) {
+    mat.onBeforeCompile = function (sh) {
+      Object.assign(sh.uniforms, U);
+      sh.vertexShader = 'varying vec3 vWP;\n' + sh.vertexShader.replace('#include <project_vertex>',
+        '#include <project_vertex>\n  vWP = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+      sh.fragmentShader = 'varying vec3 vWP;\nuniform vec3 uTarget; uniform vec2 uDir; uniform float uOff; uniform float uOn;\n' +
+        sh.fragmentShader.replace('void main() {', 'void main() {\n' +
+          // плавный переход: прозрачность нарастает на 0,8 м от границы передней зоны
+          '  float t = vWP.y > 0.03 ? smoothstep(uOff, uOff + 0.8, dot(vWP.xz - uTarget.xz, uDir)) * uOn : 0.0;\n' +
+          (ghost ? '  if (t <= 0.002) discard;' : '  if (t > 0.002) discard;'));
+      if (ghost) sh.fragmentShader = sh.fragmentShader.replace('#include <opaque_fragment>', '#include <opaque_fragment>\n  gl_FragColor.a *= mix(1.0, 0.2, t);');
+    };
+    mat.customProgramCacheKey = function () { return ghost ? 'iv3d-ghost' : 'iv3d-cut'; };
+  }
+
+  function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html) e.innerHTML = html; return e; }
+
+  function mount(root) {
+    if (root.__iv3d) return root.__iv3d;
+    var load = el('div', 'iv3d__load', '<div>Загрузка 3D</div><div class="iv3d__bar"><i></i></div>');
+    var bar = load.querySelector('i');
+    var hint = el('div', 'iv3d__hint', 'Вращайте и приближайте модель');
+    var nav = el('div', 'iv3d__rooms');
+    root.appendChild(load); root.appendChild(hint); root.appendChild(nav);
+    var api = { ready: false };
+    root.__iv3d = api;
+
+    loadLibs().then(function (L) {
+      var THREE = L.THREE;
+      var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      root.insertBefore(renderer.domElement, load);
+
+      var scene = new THREE.Scene();
+      scene.add(new THREE.HemisphereLight(0xfff6ea, 0xb8a990, 2.2));
+      var sun = new THREE.DirectionalLight(0xfff1dc, 1.4); sun.position.set(-6, 10, 4); scene.add(sun);
+
+      var cam = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+      var ctl = new L.OrbitControls(cam, renderer.domElement);
+      ctl.enableDamping = true; ctl.dampingFactor = 0.08;
+      ctl.minPolarAngle = 0.05; ctl.maxPolarAngle = 1.15;
+      ctl.minDistance = 3; ctl.maxDistance = 22;
+      ctl.screenSpacePanning = false;
+      ctl.autoRotate = true; ctl.autoRotateSpeed = 0.6;
+
+      var draco = new L.DRACOLoader(); draco.setDecoderPath('assets/'); draco._loadLibrary = function (u, t) { return fetch(KPA(u.split('/').pop())).then(function (r) { return t === 'arraybuffer' ? r.arrayBuffer() : r.text(); }); };
+      var gl = new L.GLTFLoader(); gl.setDRACOLoader(draco);
+
+      var center = new THREE.Vector3(), home = { t: new THREE.Vector3(), p: new THREE.Vector3() };
+      var tags = [];
+      // запечённые текстуры отдельными файлами: сначала лёгкие (lo), затем md на телефоне или hi на компьютере
+      var TEX = JSON.parse(root.getAttribute('data-tex') || 'null'), MATS = {};
+      function bakedMats(k) { return MATS[k] || (MATS[k] = []); }
+      var texLoader = new THREE.TextureLoader(); texLoader.setCrossOrigin('anonymous');
+      function loadTex(level) {
+        return Promise.all(Object.keys(TEX || {}).map(function (k) {
+          var url = TEX[k][level]; if (!url) return null;
+          // большие текстуры лежат на CDN упакованными в PNG (Тильда ужимает картинки больше 1680 px)
+          var p = /\.png(\?|$)|^data:image\/png/.test(url)
+            ? unpackPng(url, function () {}).then(function (buf) {
+                return createImageBitmap(new Blob([buf], { type: 'image/webp' }), { imageOrientation: 'none', premultiplyAlpha: 'none' });
+              }).then(function (bmp) { var t = new THREE.Texture(bmp); t.needsUpdate = true; return t; })
+            : texLoader.loadAsync(url);
+          return p.then(function (t) {
+            t.flipY = false; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            bakedMats(k).forEach(function (m) { var old = m.map; m.map = t; m.needsUpdate = true; if (old && old !== t) old.dispose(); });
+          }, function () { return null; });
+        }));
+      }
+      var small = Math.min(screen.width, screen.height) <= 820 || (navigator.deviceMemory || 8) <= 4;
+      var cutGoal = 0, lastT = performance.now();
+      var CUT = { uTarget: { value: new THREE.Vector3() }, uDir: { value: new THREE.Vector2(0, 1) }, uOff: { value: 1 }, uOn: { value: 0 } };
+      function onModel(g) {
+        var ghosts = [];
+        g.scene.traverse(function (o) {
+          if (!o.isMesh) return;
+          var m = o.material;
+          if (/_baked$/.test(m.name)) {
+            // запечённый свет: без освещения three.js; карта либо внутри файла, либо подгружается отдельно (data-tex)
+            if (m.map) { m.map.colorSpace = THREE.SRGBColorSpace; m.map.anisotropy = renderer.capabilities.getMaxAnisotropy(); }
+            o.material = new THREE.MeshBasicMaterial({ map: m.map || null });
+            bakedMats(m.name.replace(/_baked$/, '')).push(o.material);
+            if (m.name === 'struct_baked') ghosts.push(o);
+          } else if (m.name === 'glass') {
+            o.material = new THREE.MeshBasicMaterial({ color: 0xdde8ea, transparent: true, opacity: 0.18, depthWrite: false });
+          }
+        });
+        ghosts.forEach(function (o) {
+          cutaway(o.material, CUT, false);
+          var gm = new THREE.MeshBasicMaterial({ map: o.material.map, transparent: true, depthWrite: false });
+          bakedMats('struct').push(gm);
+          cutaway(gm, CUT, true);
+          var ghost = new THREE.Mesh(o.geometry, gm); ghost.renderOrder = 10;
+          ghost.position.copy(o.position); ghost.quaternion.copy(o.quaternion); ghost.scale.copy(o.scale);
+          o.parent.add(ghost);
+        });
+        scene.add(g.scene);
+        var box = new THREE.Box3().setFromObject(g.scene); box.getCenter(center); center.y = 0.6;
+        // зеркала: вместо запечённой картинки — живое отражение с текущего ракурса (в половинном разрешении)
+        var mirrors = [];
+        g.scene.traverse(function (o) { if (o.isMesh && /^mirror_/.test(o.name)) mirrors.push(o); });
+        mirrors.forEach(function (o) {
+          var b = new THREE.Box3().setFromObject(o), sz = b.getSize(new THREE.Vector3()), c = b.getCenter(new THREE.Vector3());
+          var alongX = sz.x < sz.z, w = alongX ? sz.z : sz.x, h = sz.y;
+          var res = Math.min(1024, Math.round(512 * (renderer.getPixelRatio() || 1)));
+          var r = new L.Reflector(new THREE.PlaneGeometry(w, h), { clipBias: 0.003, color: 0xd4d7d8,
+            textureWidth: Math.round(res * Math.min(1, w / h)), textureHeight: Math.round(res * Math.min(1, h / w)) });
+          var toC = center.clone().sub(c);
+          if (alongX) { var sx = Math.sign(toC.x) || 1; r.rotation.y = sx * Math.PI / 2; r.position.set(c.x + sx * (sz.x / 2 + 0.002), c.y, c.z); }
+          else { var sz_ = Math.sign(toC.z) || 1; r.rotation.y = sz_ > 0 ? 0 : Math.PI; r.position.set(c.x, c.y, c.z + sz_ * (sz.z / 2 + 0.002)); }
+          o.visible = false; scene.add(r);
+        });
+        home.t.copy(center);
+        home.p.set(center.x + 6.0, 13.5, center.z + 8.0);
+        cam.position.copy(home.p); ctl.target.copy(home.t); ctl.update();
+
+        ROOMS.forEach(function (r, i) {
+          var b = el('button', i ? '' : 'is-on', r.name + (r.area ? '<span>' + r.area + ' м²</span>' : ''));
+          b.addEventListener('click', function () { focus(r); });
+          nav.appendChild(b); r.btn = b;
+          if (r.c) {
+            var t = el('div', 'iv3d__tag', r.name + '<small>' + r.area + ' м²</small>');
+            root.appendChild(t);
+            tags.push({ el: t, p: new THREE.Vector3(r.c[0], 1.0, -r.c[1]) });
+          }
+        });
+        var reveal = function () { load.style.opacity = 0; setTimeout(function () { load.remove(); }, 600); };
+        if (TEX) loadTex('lo').then(function () { reveal(); return loadTex(small ? 'md' : 'hi'); });
+        else reveal();
+        api.ready = true;
+      }
+      function onProgress(e) { if (e.total) bar.style.width = Math.round(e.loaded / e.total * 100) + '%'; }
+      function onError() { load.firstChild.textContent = 'Не удалось загрузить модель'; }
+      var src = root.getAttribute('data-src');
+      if (/\.png(\?|$)|^data:image\/png/.test(src)) unpackPng(src, onProgress).then(function (buf) { gl.parse(buf, '', onModel, onError); }, onError);
+      else gl.load(src, onModel, onProgress, onError);
+
+      // плавный перелёт камеры
+      var fly = null;
+      function focus(r) {
+        ROOMS.forEach(function (x) { x.btn && x.btn.classList.toggle('is-on', x === r); });
+        if (r.btn && nav.scrollWidth > nav.clientWidth)
+          nav.scrollTo({ left: r.btn.offsetLeft - (nav.clientWidth - r.btn.offsetWidth) / 2, behavior: 'smooth' });
+        root.classList.toggle('is-room', !!r.c);
+        cutGoal = r.c ? 1 : 0; if (r.c) CUT.uOff.value = (r.cut || 1.0) - 0.3;
+        ctl.autoRotate = false;
+        var t, p;
+        if (!r.c) { t = home.t.clone(); p = home.p.clone(); }
+        else {
+          t = new THREE.Vector3(r.c[0], 0.4, -r.c[1]);
+          // свой ракурс у комнат, где стена иначе закрывает обзор; dir — в координатах плана (x, y)
+          var dir = r.dir ? new THREE.Vector3(r.dir[0], 0, -r.dir[1]).normalize() : cam.position.clone().sub(ctl.target).setY(0).normalize();
+          p = t.clone().add(dir.multiplyScalar(r.dist * 0.4)).setY(r.dist * 1.05);
+        }
+        fly = { t0: ctl.target.clone(), p0: cam.position.clone(), t1: t, p1: p, s: performance.now() };
+      }
+      api.focus = function (id) { var r = ROOMS.filter(function (x) { return x.id === id; })[0]; if (r) focus(r); };
+
+      function stopIntro() { ctl.autoRotate = false; hint.style.opacity = 0; }
+      renderer.domElement.addEventListener('pointerdown', stopIntro);
+      renderer.domElement.addEventListener('wheel', stopIntro, { passive: true });
+
+      function resize() {
+        var w = root.clientWidth, h = root.clientHeight;
+        renderer.setSize(w, h, false); cam.aspect = w / h;
+        cam.fov = Math.min(62, 38 * Math.max(1, 1.5 / cam.aspect));   // узкий экран — шире угол, чтобы квартира влезла
+        cam.updateProjectionMatrix();
+      }
+      new ResizeObserver(resize).observe(root); resize();
+
+      var visible = true;
+      new IntersectionObserver(function (e) { visible = e[0].isIntersecting; }).observe(root);
+      var v = new THREE.Vector3();
+      (function tick(now) {
+        requestAnimationFrame(tick);
+        if (!visible) return;
+        if (fly) {
+          var k = Math.min(1, (now - fly.s) / 1100); k = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+          ctl.target.lerpVectors(fly.t0, fly.t1, k); cam.position.lerpVectors(fly.p0, fly.p1, k);
+          if (k === 1) fly = null;
+        }
+        ctl.update();
+        var dt = Math.min(0.1, (now - lastT) / 1000); lastT = now;
+        CUT.uOn.value += (cutGoal - CUT.uOn.value) * Math.min(1, dt * 5);   // включение/выключение ~0,5 с
+        if (CUT.uOn.value > 0.001) {
+          var dx = cam.position.x - ctl.target.x, dz = cam.position.z - ctl.target.z, l = Math.hypot(dx, dz) || 1;
+          CUT.uDir.value.set(dx / l, dz / l); CUT.uTarget.value.copy(ctl.target);
+        }
+        renderer.render(scene, cam);
+        var w = root.clientWidth, h = root.clientHeight;
+        tags.forEach(function (t) {
+          v.copy(t.p).project(cam);
+          t.el.style.transform = 'translate(' + ((v.x + 1) / 2 * w) + 'px,' + ((1 - v.y) / 2 * h) + 'px) translate(-50%,-50%)';
+          t.el.style.opacity = v.z < 1 ? 1 : 0;
+        });
+      })(performance.now());
+    });
+    return api;
+  }
+
+  var st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
+  // предзагрузка, пока посетитель ещё смотрит план: движок, геометрия и лёгкие текстуры попадают в кэш браузера
+  var prefetched = {};
+  function prefetch(src, tex) {
+    if (!src || prefetched[src]) return; prefetched[src] = 1;
+    var go = function () {
+      loadLibs();
+      fetch(src, { mode: 'cors' }).catch(function () {});
+      Object.keys(tex || {}).forEach(function (k) { if (tex[k].lo) fetch(tex[k].lo, { mode: 'cors' }).catch(function () {}); });
+    };
+    try {
+      if (window.requestIdleCallback) requestIdleCallback(go, { timeout: 3000 }); else setTimeout(go, 1500);
+    } catch (e) {}
+  }
+  window.IV3D = { mount: mount, prefetch: prefetch };
+  function boot() { document.querySelectorAll('.iv3d[data-src]').forEach(mount); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
+<script>/* IVORY 360°-тур по квартире: сферические панорамы комнат, переходы метками и кнопками.
+   IVPANO.mount(box, { rooms: [{ id, name, area, at: [x, y], yaw, links: [[id, x, y]], lo, md, hi }] }) — at/yaw как в ivory-3d/pano.py.
+   Картинки больше 1680 px Тильда ужимает, поэтому md/hi — JPEG-байты внутри PNG (ivory-3d/pack.py). */
+(function () {
+  if (window.IVPANO) return;
+  var CDN = 'https://cdn.jsdelivr.net/npm/three@0.160.0';
+  var EYE = 1.55;   /* высота камеры, как в pano.py */
+
+  var CSS = '' +
+    '.ivp{position:relative;width:100%;height:100%;background:#EDE7D9;overflow:hidden;touch-action:none;-webkit-user-select:none;' +
+    'font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;user-select:none;-webkit-user-select:none}' +
+    '.ivp canvas{display:block;width:100%!important;height:100%!important;cursor:grab}.ivp canvas:active{cursor:grabbing}' +
+    '.ivp__load{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;' +
+    'letter-spacing:.12em;text-transform:uppercase;color:#8B7355;background:#EDE7D9;transition:opacity .5s;pointer-events:none}' +
+    '.ivp__rooms{position:absolute;left:16px;right:16px;bottom:16px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center}' +
+    '.ivp__rooms button{font:500 11px/1 \'Helvetica Neue\',Helvetica,Arial,sans-serif;letter-spacing:.06em;color:#6B6355;background:rgba(255,255,255,.85);' +
+    'backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid #D9D0C0;border-radius:999px;padding:9px 14px;cursor:pointer}' +
+    '.ivp__rooms button span{opacity:.6;margin-left:6px;font-weight:400}' +
+    '.ivp__rooms button.is-on{background:#8B7355;border-color:#8B7355;color:#fff}' +
+    '.ivp__spot{position:absolute;left:0;top:0;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:6px;' +
+    'cursor:pointer;transition:opacity .3s}' +
+    '.ivp__spot i{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.35);border:2px solid #fff;' +
+    'box-shadow:0 2px 10px rgba(0,0,0,.25);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}' +
+    '.ivp__spot b{font:500 11px \'Helvetica Neue\',Helvetica,Arial,sans-serif;color:#fff;background:rgba(44,36,22,.55);padding:4px 8px;border-radius:4px;white-space:nowrap}' +
+    '.ivp__fs{position:absolute;top:12px;left:12px;z-index:3;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;' +
+    'justify-content:center;color:#6B6355;background:rgba(255,255,255,.85);border:1px solid #D9D0C0;cursor:pointer;padding:0;' +
+    'backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}' +
+    '.ivp.is-fs{position:fixed;left:0;top:0;width:100vw;height:100vh;height:100dvh;z-index:2147483000}' +
+    '.ivp:fullscreen{width:100vw;height:100vh}.ivp:-webkit-full-screen{width:100vw;height:100vh}' +
+    '.ivp.is-fs .ivp__fs,.ivp:fullscreen .ivp__fs{top:max(12px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left))}' +
+    '.ivp.is-fs .ivp__rooms,.ivp:fullscreen .ivp__rooms{bottom:max(16px,env(safe-area-inset-bottom))}' +
+    '.ivp-lock,.ivp-lock body{overflow:hidden!important;overscroll-behavior:none}' +
+    '.ivp__hint{position:absolute;top:18px;left:62px;font-size:11px;background:rgba(255,255,255,.75);color:#6B6355;' +
+    'border-radius:999px;padding:7px 12px;pointer-events:none;transition:opacity .6s}' +
+    '@media (max-width:768px){.ivp__rooms{left:0;right:0;bottom:12px;flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;' +
+    'padding:2px 12px;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}' +
+    '.ivp__rooms::-webkit-scrollbar{display:none}.ivp__rooms button{flex:0 0 auto;padding:8px 11px;font-size:10px}.ivp__hint{top:62px;left:12px}}';
+
+  /* JPEG/WebP-байты, спрятанные в PNG (3 байта на пиксель, первые 4 — длина) */
+  function unpack(url) {
+    return fetch(url, { mode: 'cors' }).then(function (r) { return r.blob(); })
+      .then(function (b) { return createImageBitmap(b, { premultiplyAlpha: 'none', colorSpaceConversion: 'none' }); })
+      .then(function (bmp) {
+        var c = document.createElement('canvas'); c.width = bmp.width; c.height = bmp.height;
+        var x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(bmp, 0, 0);
+        var px = x.getImageData(0, 0, c.width, c.height).data, rgb = new Uint8Array(px.length / 4 * 3);
+        for (var i = 0, j = 0; i < px.length; i += 4) { rgb[j++] = px[i]; rgb[j++] = px[i + 1]; rgb[j++] = px[i + 2]; }
+        var n = ((rgb[0] << 24) >>> 0) + (rgb[1] << 16) + (rgb[2] << 8) + rgb[3];
+        return createImageBitmap(new Blob([rgb.subarray(4, 4 + n)], { type: 'image/jpeg' }), { imageOrientation: 'flipY' });
+      });
+  }
+
+  var ICON_ENTER = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
+  var ICON_EXIT = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>';
+
+  function el(t, c, h) { var e = document.createElement(t); if (c) e.className = c; if (h) e.innerHTML = h; return e; }
+
+  function mount(box, cfg) {
+    if (box.__ivp) return box.__ivp;
+    var api = {}; box.__ivp = api;
+    var root = el('div', 'ivp'); box.appendChild(root);
+    var load = el('div', 'ivp__load', 'Загрузка 360°'); root.appendChild(load);
+    var hint = el('div', 'ivp__hint', 'Осмотритесь: потяните изображение'); root.appendChild(hint);
+    var nav = el('div', 'ivp__rooms'); root.appendChild(nav);
+    var rooms = cfg.rooms, spots = [];
+
+    Promise.resolve(window.KP3.THREE).then(function (THREE) {
+      var r = new THREE.WebGLRenderer({ antialias: true });
+      r.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); r.outputColorSpace = THREE.SRGBColorSpace;
+      root.insertBefore(r.domElement, load);
+      var big = r.capabilities.maxTextureSize >= 8192 && Math.min(screen.width, screen.height) > 820;
+      var scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(75, 1, 0.1, 100);
+      var geo = new THREE.SphereGeometry(10, 96, 48); geo.scale(-1, 1, 1);
+      var mat = new THREE.MeshBasicMaterial({ transparent: true }); scene.add(new THREE.Mesh(geo, mat));
+      var lon = 180, lat = -5, cur = null, tex = {}, token = 0;
+
+      function setTex(t, flip) {
+        t.colorSpace = THREE.SRGBColorSpace; t.flipY = flip; t.anisotropy = r.capabilities.getMaxAnisotropy();
+        var old = mat.map; mat.map = t; mat.needsUpdate = true; if (old && old !== t) old.dispose();
+      }
+      function show(room, keepView) {
+        var my = ++token; cur = room;
+        rooms.forEach(function (x) { x.btn.classList.toggle('is-on', x === room); });
+        if (!keepView) { lon = tLon = 180; lat = tLat = -5; vLon = vLat = 0; }
+        mat.opacity = 0;
+        new THREE.TextureLoader().setCrossOrigin('anonymous').load(room.lo, function (t) {
+          if (my !== token) return; setTex(t, true); load.style.opacity = 0; setTimeout(function () { load.style.display = 'none'; }, 600);
+          var hi = big && room.hi ? room.hi : room.md;
+          if (hi) unpack(hi).then(function (bmp) { if (my === token) setTex(new THREE.Texture(bmp), false), mat.map.needsUpdate = true; });
+        });
+        spots.forEach(function (s) { s.el.remove(); }); spots = [];
+        // метки — в дверных проёмах (room.links: [[id, x, y], …], точки на плане); высота метки ≈ 0,9 м
+        (room.links || []).forEach(function (lk) {
+          var o = rooms.filter(function (x) { return x.id === lk[0]; })[0]; if (!o) return;
+          var dx = lk[1] - room.at[0], dy = lk[2] - room.at[1];
+          var a = Math.atan2(dy, dx) * 180 / Math.PI, d = Math.hypot(dx, dy);
+          var s = el('div', 'ivp__spot', '<i></i><b>' + o.name + '</b>');
+          s.addEventListener('click', function () { go(o, a); });
+          root.appendChild(s);
+          // центр панорамы смотрит на room.yaw; вправо по кадру — угол на плане уменьшается
+          spots.push({ el: s, lon: 180 + (room.yaw - a), lat: -Math.atan2(EYE - 0.9, d) * 180 / Math.PI });
+        });
+      }
+      function go(o, a) {
+        // в новой комнате смотрим в ту же сторону, куда шли — переход ощущается шагом вперёд
+        show(o, true); lon = tLon = 180 + (o.yaw - a); lat = tLat = -5; vLon = vLat = 0;
+      }
+      api.show = function (id) { var o = rooms.filter(function (x) { return x.id === id; })[0]; if (o) show(o); };
+
+      rooms.forEach(function (o) {
+        o.btn = el('button', '', o.name + (o.area ? '<span>' + o.area + ' м²</span>' : ''));
+        o.btn.addEventListener('click', function () { show(o); }); nav.appendChild(o.btn);
+      });
+
+      /* вид плавно догоняет цель (tLon/tLat/tZoom), после отпускания — инерция с затуханием */
+      var cv = r.domElement, down = null, pinch = null, base = 75, zoom = 1, tZoom = 1;
+      var tLon = lon, tLat = lat, vLon = 0, vLat = 0, last = null;
+      var SPEED = 1.8;                                   // во сколько раз поворот быстрее движения пальца по кадру
+      function fov() { cam.fov = Math.max(30, Math.min(100, base * zoom)); cam.updateProjectionMatrix(); }
+      function grab(x, y) { down = { x: x, y: y, lon: tLon, lat: tLat }; last = { x: x, y: y, t: performance.now() }; vLon = vLat = 0; hint.style.opacity = 0; }
+      function drag(x, y) {
+        if (!down) return;
+        var k = cam.fov / cv.clientHeight * SPEED, now = performance.now(), dt = Math.max(8, now - last.t);
+        tLon = down.lon - (x - down.x) * k; tLat = Math.max(-85, Math.min(85, down.lat + (y - down.y) * k));
+        vLon = -(x - last.x) * k / dt * 16; vLat = (y - last.y) * k / dt * 16;   // градусов за кадр
+        last = { x: x, y: y, t: now };
+      }
+      function release() { if (down && performance.now() - last.t > 80) vLon = vLat = 0; down = null; }
+      function dist(t) { return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY); }
+      // мышь
+      function ui(e) { return e.target.closest && e.target.closest('button, .ivp__spot'); }
+      root.addEventListener('mousedown', function (e) { if (!ui(e)) grab(e.clientX, e.clientY); });
+      addEventListener('mousemove', function (e) { drag(e.clientX, e.clientY); });
+      addEventListener('mouseup', release);
+      root.addEventListener('wheel', function (e) {
+        e.preventDefault(); tZoom = Math.max(0.45, Math.min(1.3, tZoom * (1 + e.deltaY * 0.0015)));
+      }, { passive: false });
+      // касания: свои обработчики, браузер не забирает жест под прокрутку страницы
+      root.addEventListener('touchstart', function (e) {
+        if (ui(e)) return;
+        var t = e.touches;
+        if (t.length === 1) { pinch = null; grab(t[0].clientX, t[0].clientY); }
+        else if (t.length === 2) { down = null; vLon = vLat = 0; pinch = { d: dist(t), z: tZoom }; hint.style.opacity = 0; }
+        e.preventDefault();
+      }, { passive: false });
+      root.addEventListener('touchmove', function (e) {
+        if (!down && !pinch) return;
+        var t = e.touches;
+        if (pinch && t.length === 2) tZoom = Math.max(0.45, Math.min(1.3, pinch.z * pinch.d / dist(t)));
+        else if (t.length === 1) drag(t[0].clientX, t[0].clientY);
+        e.preventDefault();
+      }, { passive: false });
+      root.addEventListener('touchend', function (e) {
+        var t = e.touches;
+        if (!t.length) { release(); pinch = null; }
+        else if (t.length === 1) { pinch = null; grab(t[0].clientX, t[0].clientY); }   // второй палец убран — продолжаем поворот
+      });
+
+      // во весь экран: Fullscreen API, а где его нет (iPhone) — растягиваем блок поверх страницы
+      var fs = el('button', 'ivp__fs', '');
+      fs.setAttribute('aria-label', 'Во весь экран'); root.appendChild(fs);
+      var home = null;
+      function isFs() { return document.fullscreenElement === root || document.webkitFullscreenElement === root || root.classList.contains('is-fs'); }
+      function icon() { fs.innerHTML = isFs() ? ICON_EXIT : ICON_ENTER; fs.setAttribute('aria-label', isFs() ? 'Свернуть' : 'Во весь экран'); }
+      function pseudo(on) {
+        if (on) { home = document.createComment('ivp'); root.parentNode.insertBefore(home, root); document.body.appendChild(root); }
+        else if (home) { home.parentNode.insertBefore(root, home); home.remove(); home = null; }
+        root.classList.toggle('is-fs', on); document.documentElement.classList.toggle('ivp-lock', on); icon();
+      }
+      fs.addEventListener('click', function () {
+        if (isFs()) {
+          if (document.fullscreenElement) document.exitFullscreen();
+          else if (document.webkitFullscreenElement) document.webkitExitFullscreen();
+          else pseudo(false);
+          return;
+        }
+        var req = root.requestFullscreen || root.webkitRequestFullscreen;
+        if (req) { var p = req.call(root); if (p && p.catch) p.catch(function () { pseudo(true); }); }
+        else pseudo(true);
+      });
+      document.addEventListener('fullscreenchange', icon); document.addEventListener('webkitfullscreenchange', icon);
+      addEventListener('keydown', function (e) { if (e.key === 'Escape' && root.classList.contains('is-fs')) pseudo(false); });
+      icon();
+
+      function size() {
+        var w = root.clientWidth, h = root.clientHeight; r.setSize(w, h, false);
+        cam.aspect = w / h; base = w < h ? 90 : 75; fov();
+      }
+      new ResizeObserver(size).observe(root); size();
+
+      var visible = true; new IntersectionObserver(function (e) { visible = e[0].isIntersecting; }).observe(root);
+      var v = new THREE.Vector3();
+      (function tick() {
+        requestAnimationFrame(tick); if (!visible) return;
+        if (mat.opacity < 1) mat.opacity = Math.min(1, mat.opacity + 0.08);
+        if (!down && (Math.abs(vLon) > 0.01 || Math.abs(vLat) > 0.01)) {          // инерция
+          tLon += vLon; tLat = Math.max(-85, Math.min(85, tLat + vLat)); vLon *= 0.93; vLat *= 0.93;
+        }
+        lon += (tLon - lon) * 0.35; lat += (tLat - lat) * 0.35;
+        if (Math.abs(tZoom - zoom) > 0.0005) { zoom += (tZoom - zoom) * 0.25; fov(); }
+        var p = THREE.MathUtils.degToRad(90 - lat), t = THREE.MathUtils.degToRad(lon);
+        cam.lookAt(Math.sin(p) * Math.cos(t), Math.cos(p), Math.sin(p) * Math.sin(t));
+        r.render(scene, cam);
+        var w = root.clientWidth, h = root.clientHeight;
+        spots.forEach(function (s) {
+          var sp = THREE.MathUtils.degToRad(90 - s.lat), st = THREE.MathUtils.degToRad(s.lon);
+          v.set(Math.sin(sp) * Math.cos(st), Math.cos(sp), Math.sin(sp) * Math.sin(st)).multiplyScalar(5).project(cam);
+          var on = v.z < 1 && Math.abs(v.x) < 1.1 && Math.abs(v.y) < 1.1;
+          s.el.style.opacity = on ? 1 : 0; s.el.style.pointerEvents = on ? 'auto' : 'none';
+          s.el.style.transform = 'translate(' + ((v.x + 1) / 2 * w) + 'px,' + ((1 - v.y) / 2 * h) + 'px) translate(-50%,-50%)';
+        });
+      })();
+      show(rooms.filter(function (x) { return x.id === (cfg.start || rooms[0].id); })[0]);
+    });
+    return api;
+  }
+
+  var st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
+  window.IVPANO = { mount: mount };
+})();
+</script>
+<script>
+(function(){
+  var A=window.KPA=function(n){return (window.KP_ASSETS&&window.KP_ASSETS[n])||'assets/'+n};
+  var $=function(s,r){return (r||document).querySelector(s)},$$=function(s,r){return [].slice.call((r||document).querySelectorAll(s))};
+  $$('img[data-a]').forEach(function(i){i.src=A(i.getAttribute('data-a'))});
+
+  /* навигация */
+  var secs=$$('.s'),cur=0,cnt=$('#cnt'),prog=$('#prog');
+  function go(i){i=Math.max(0,Math.min(secs.length-1,i));secs[i].scrollIntoView({block:'start'})}
+  function sync(){
+    var y=scrollY+innerHeight*.4,k=0;
+    secs.forEach(function(s,i){if(s.offsetTop<=y)k=i});
+    cur=k;cnt.textContent=(k+1)+' / '+secs.length;
+    prog.style.transform='scaleX('+(k/(secs.length-1))+')';
+  }
+  addEventListener('scroll',sync,{passive:true});addEventListener('resize',sync);sync();
+  $('#nx').onclick=function(){go(cur+1)};$('#pv').onclick=function(){go(cur-1)};
+  addEventListener('keydown',function(e){
+    if(e.metaKey||e.ctrlKey||e.altKey)return;
+    var onBtn=e.target.closest&&e.target.closest('button,a');
+    if(['ArrowDown','ArrowRight','PageDown'].indexOf(e.key)>=0||(e.key===' '&&!onBtn)){e.preventDefault();go(cur+1)}
+    if(['ArrowUp','ArrowLeft','PageUp'].indexOf(e.key)>=0){e.preventDefault();go(cur-1)}
+    if(e.key==='Home'){e.preventDefault();go(0)} if(e.key==='End'){e.preventDefault();go(secs.length-1)}
+  });
+
+  /* вход экранов */
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('go');io.unobserve(e.target)}})},{threshold:.18});
+  secs.forEach(function(s){io.observe(s)});
+
+  /* ролики: c=[x,y,w,h] — окно в кадре 720×960, пятый элемент — другой файл */
+  var CROP={cinema:[62,556,590,270],aerial:[0,240,720,360],walk:[50,100,620,310],amenity:[50,540,620,310],floor:[0,100,720,360],aerialT:[0,195,720,430,'aerial'],floorT:[0,60,720,430,'floor']};
+  var urls={};
+  function vurl(n){
+    if(urls[n])return urls[n];
+    var s=A('video/'+n+'.mp4');
+    urls[n]=/^data:/.test(s)?fetch(s).then(function(r){return r.blob()}).then(function(b){return URL.createObjectURL(b)}):Promise.resolve(s);
+    return urls[n];
+  }
+  function setVideo(box,n){
+    var c=CROP[n],v=$('video',box);
+    if(!v){v=document.createElement('video');v.muted=true;v.loop=true;v.playsInline=true;v.setAttribute('muted','');v.setAttribute('playsinline','');box.appendChild(v)}
+    box.style.aspectRatio=c[2]+'/'+c[3];
+    v.style.width=(720/c[2]*100)+'%';v.style.left=(-c[0]/c[2]*100)+'%';v.style.top=(-c[1]/c[3]*100)+'%';
+    box.dataset.n=n;
+    return vurl(c[4]||n).then(function(u){if(box.dataset.n!==n)return;v.src=u;if(box.dataset.seen)v.play().catch(function(){})});
+  }
+  var vio=new IntersectionObserver(function(es){es.forEach(function(e){
+    var box=e.target,v=$('video',box);
+    if(e.isIntersecting){box.dataset.seen=1;if(!v||!v.getAttribute('src'))setVideo(box,box.dataset.n);else v.play().catch(function(){})}
+    else{delete box.dataset.seen;if(v)v.pause()}
+  })},{rootMargin:'30% 0px'});
+  $$('.vc[data-v]').forEach(function(b){b.dataset.n=b.getAttribute('data-v');var c=CROP[b.dataset.n];b.style.aspectRatio=c[2]+'/'+c[3];vio.observe(b)});
+
+  /* ролик-пример в карточке бонуса */
+  var pv=$('#promo video');
+  new IntersectionObserver(function(e){
+    if(e[0].isIntersecting){if(pv.getAttribute('src'))pv.play().catch(function(){});else vurl('promo').then(function(u){pv.src=u;pv.play().catch(function(){})})}
+    else pv.pause();
+  },{rootMargin:'30% 0px'}).observe($('#promo'));
+
+  /* режимы перспективы */
+  var MODES=[
+    ['cinema','Вступление','Короткий фильм о жизни в IVORY'],
+    ['aerial','С воздуха','Дом, район и вид вокруг'],
+    ['walk','Квартира','Свободная прогулка от двери до окна'],
+    ['amenity','Двор и зоны','Терраса, зимний сад, коворкинг и двор'],
+    ['floor','Весь этаж','Все квартиры этажа на сенсорном экране']
+  ],mbox=$('#modes'),fv=$('#futV');
+  function mode(i){
+    var m=MODES[i];$$('button',mbox).forEach(function(b,k){b.setAttribute('aria-pressed',k===i)});
+    $('#modeT').textContent=m[2];setVideo(fv,m[0]);
+  }
+  MODES.forEach(function(m,i){var b=document.createElement('button');b.textContent=m[1];b.onclick=function(){mode(i)};mbox.appendChild(b)});
+  mode(4);vio.observe(fv);
+
+  /* живое демо: 3D и 360° монтируются при подходе к экрану */
+  var FILES=function(k){return {lo:A('kv04_'+k+'_lo.webp'),md:A('kv04_'+k+'_hi.png'),hi:A('kv04_'+k+'_hi.png')}};
+  var mounted3d=false,mounted360=false,mode3='3d';
+  function m3d(){
+    if(mounted3d)return;mounted3d=true;
+    var d=document.createElement('div');d.className='iv3d';d.setAttribute('data-src',A('kv04_geo.glb'));
+    d.setAttribute('data-tex',JSON.stringify({struct:FILES('struct'),furn:FILES('furn'),detail:FILES('detail')}));
+    $('#m3d').appendChild(d);IV3D.mount(d);
+  }
+  function room(id,name,area,at,yaw,links){return {id:id,name:name,area:area,at:at,yaw:yaw,links:links,lo:A('kv04_'+id+'_lo.jpg'),md:A('kv04_'+id+'_hi.png'),hi:A('kv04_'+id+'_hi.png')}}
+  function m360(){
+    if(mounted360)return;mounted360=true;
+    IVPANO.mount($('#m360'),{start:'living',rooms:[
+      room('hall','Холл','16,09',[8.0,4.35],180,[['living',5.77,4.56],['bedroom',4.99,5.69],['bath',7.39,2.24]]),
+      room('living','Кухня-гостиная','14,34',[4.05,3.75],200,[['hall',5.77,4.56]]),
+      room('bedroom','Спальня','13,42',[3.7,5.95],150,[['hall',4.99,5.69]]),
+      room('bath','Санузел','4,63',[6.45,1.8],250,[['hall',7.39,2.24]])
+    ]});
+  }
+  new IntersectionObserver(function(e,o){if(e[0].isIntersecting){m3d();o.disconnect()}},{rootMargin:'60% 0px'}).observe($('#stage'));
+  function view(v){
+    mode3=v;var is=v==='360';$('#b3d').setAttribute('aria-pressed',!is);$('#b360').setAttribute('aria-pressed',is);
+    $('#m3d').hidden=is;$('#m360').hidden=!is;if(is)m360();else m3d();
+  }
+  /* лента планировок: № 4 — живая модель, остальные показывают план в том же окне */
+  var P=[[1,'63,40'],[2,'68,76'],[3,'82,50'],[4,'48,48'],[5,'64,13'],[6,'89,22'],[7,'98,61'],[8,'48,52'],[9,'58,17'],[10,'49,32'],[11,'80,71'],[12,'108,16'],[13,'68,91'],[14,'51,55'],[15,'98,30'],[16,'82,37'],[17,'64,69']];
+  var rib=$('#rib'),planv=$('#planv'),seg=$('#seg');
+  function pick(p,btn){
+    $$('.t',rib).forEach(function(b){b.setAttribute('aria-pressed',b===btn)});
+    var live=p[0]===4;planv.hidden=live;seg.classList.toggle('off',!live);
+    if(!live)$('#planImg').src=A('plans/kv'+('0'+p[0]).slice(-2)+'.jpg');
+  }
+  P.forEach(function(p){
+    var b=document.createElement('button');b.className='t';b.setAttribute('aria-label','Планировка '+p[0]+', '+p[1]+' м²');
+    b.innerHTML='<span class="p"><img alt="" src="'+A('plans/kv'+('0'+p[0]).slice(-2)+'.jpg')+'"></span><b>№ '+p[0]+'</b><span>'+p[1]+' м²</span>';
+    b.onclick=function(){pick(p,b)};rib.appendChild(b);
+    if(p[0]===4)pick(p,b);
+  });
+  function live(){pick(P[3],$$('.t',rib)[3])}
+  $('#b3d').onclick=function(){live();view('3d')};$('#b360').onclick=function(){live();view('360')};
+
+  /* тумблер +80 000: появляется подарок, он ведёт на экран бонуса */
+  var sw=$('#sw'),cardB=$('#cardB'),sum=$('#sum'),gift=$('#gift');
+  sw.onclick=function(){
+    var on=sw.getAttribute('aria-pressed')!=='true';
+    sw.setAttribute('aria-pressed',on);cardB.classList.toggle('on',on);
+    gift.tabIndex=on?0:-1;
+    sum.textContent=on?'Всего 230 000 сом':'Панорамы всех планировок';
+  };
+  gift.onclick=function(){$('#bonus').scrollIntoView({block:'start'})};
+})();
+</script>
+
+</body></html>
