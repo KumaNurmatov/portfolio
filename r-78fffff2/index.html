@@ -1,0 +1,228 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"></head><body>
+<title>Рассылка бухгалтериям</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: рабочий список рассылки в стиле БухПульта — карточка на компанию, сверху прогресс,
+   лайм только для главного действия и отметки «отправлено». Одна светлая тема. */
+:root{
+  --bg:#ECECF0; --surface:#FFFFFF; --soft:#F4F4F7; --line:#E3E3E8;
+  --ink:#0E0E10; --ink-2:#3C3C43; --muted:#6B6B74;
+  --dark:#0E0E10; --dark-2:#1C1C21; --dark-3:#2A2A31; --on-dark:#F5F5F7; --on-dark-muted:#A3A3AD;
+  --lime:#D7F542; --wa:#128C4A;
+  --f:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:980px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 64px;display:flex;flex-direction:column;gap:12px}
+h1,h2,h3{margin:0;letter-spacing:-.02em;text-wrap:balance}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+.head{position:relative;overflow:hidden;background:var(--dark);color:var(--on-dark);border-radius:28px;padding:22px 24px}
+.head::before{content:"";position:absolute;inset:0;background:radial-gradient(40% 90% at 0% 120%,rgba(215,245,66,.5),transparent 100%);pointer-events:none}
+.head > *{position:relative}
+.head h1{font-size:26px}
+.head p{margin:6px 0 0;color:#D0D0D6;max-width:60ch}
+.prog{display:flex;align-items:center;gap:12px;margin-top:18px}
+.bar{flex:1;height:8px;border-radius:99px;background:var(--dark-3);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--lime);border-radius:99px;transition:width .3s}
+.prog b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.links{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.links a{color:var(--on-dark);font-size:13px;border:1px solid var(--dark-3);border-radius:99px;padding:5px 12px;text-decoration:none}
+.links a:hover{border-color:var(--on-dark-muted)}
+
+.rules{background:var(--surface);border-radius:22px;padding:16px 20px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;font-size:13px;color:var(--ink-2)}
+.rules b{display:block;color:var(--ink);font-size:13.5px}
+
+.day{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:14px 4px 0;flex-wrap:wrap}
+.day h2{font-size:19px}
+.day span{color:var(--muted);font-size:13px}
+
+.card{background:var(--surface);border-radius:22px;padding:18px 20px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px 18px;transition:opacity .2s}
+.card.sent{opacity:.6}
+.card h3{font-size:17px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pill{font-size:11.5px;font-weight:600;border-radius:99px;padding:1px 9px;background:var(--soft);color:var(--ink-2);letter-spacing:0}
+.pill.hi{background:var(--lime);color:var(--ink)}
+.meta{color:var(--muted);font-size:13px;margin-top:3px}
+.contact{font-size:13px;margin-top:6px;color:var(--ink-2);user-select:all}
+.msg{grid-column:1/-1;background:var(--soft);border-radius:16px;padding:14px 16px;font-size:13.5px;white-space:pre-line;color:var(--ink);min-width:0;overflow-wrap:anywhere}
+.msg .subj{display:block;font-weight:600;margin-bottom:8px}
+.acts{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:99px;padding:9px 16px;font-weight:600;font-size:13px;border:1px solid transparent;text-decoration:none}
+.btn-wa{background:var(--wa);color:#fff}
+.btn-dark{background:var(--ink);color:var(--on-dark)}
+.btn-line{background:transparent;border-color:var(--line);color:var(--ink)}
+.btn-line:hover{border-color:var(--ink)}
+.done{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;cursor:pointer;user-select:none}
+.done input{appearance:none;width:22px;height:22px;border-radius:50%;border:1.6px solid #B9B9C2;margin:0;cursor:pointer}
+.done input:checked{background:var(--lime) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230E0E10' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center/14px no-repeat;border-color:var(--lime)}
+.when{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+
+.next{background:var(--surface);border-radius:22px;padding:18px 20px}
+.next p{margin:4px 0 12px;color:var(--muted);font-size:13px}
+.next ul{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(2,1fr);gap:6px 18px}
+.next li{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:7px 0;border-bottom:1px solid var(--line)}
+.next a{color:var(--ink);font-weight:500}
+.next .r{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(10px);background:var(--ink);color:var(--on-dark);padding:10px 18px;border-radius:99px;font-weight:500;opacity:0;transition:.2s;pointer-events:none;max-width:calc(100% - 32px)}
+.toast.show{opacity:1;transform:translateX(-50%)}
+
+@media (max-width:640px){
+  .rules,.next ul{grid-template-columns:1fr}
+  .card{grid-template-columns:1fr;padding:16px}
+  .head{padding:18px;border-radius:24px}
+  .done{margin-left:0;width:100%}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <h1>Рассылка бухгалтериям, партия 1</h1>
+    <p>12 компаний с прямыми контактами. Каждое сообщение уже написано под компанию. Нажмите «Открыть WhatsApp», проверьте текст и отправьте сами, затем отметьте «Отправлено».</p>
+    <div class="prog"><div class="bar"><i id="pbar" style="width:0"></i></div><b id="ptext">0 из 12</b></div>
+    <div class="links">
+      <a href="https://kumanurmatov.github.io/portfolio/buhpult/" target="_blank" rel="noopener">Демо</a>
+      <a href="https://kumanurmatov.github.io/portfolio/kp-ai-buh/" target="_blank" rel="noopener">КП для бухгалтерий</a>
+    </div>
+  </header>
+
+  <section class="rules">
+    <div><b>Не больше 6–8 в день</b>WhatsApp блокирует номера за массовые сообщения незнакомым.</div>
+    <div><b>Отправляйте вручную</b>Перед отправкой прочитайте текст: деталь про компанию можно поправить.</div>
+    <div><b>Через 3–4 дня</b>тем, кто не ответил, отправьте короткое напоминание. Кнопка есть в каждой карточке.</div>
+  </section>
+
+  <div id="list"></div>
+
+  <section class="next">
+    <h2 style="font-size:19px">Партия 2: высокий рейтинг в 2ГИС</h2>
+    <p>Прямых контактов нет. Откройте карточку, нажмите «Позвонить» или WhatsApp и используйте общий текст из любой карточки выше.</p>
+    <ul id="next"></ul>
+  </section>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const DEMO='https://kumanurmatov.github.io/portfolio/buhpult/';
+const KP='https://kumanurmatov.github.io/portfolio/kp-ai-buh/';
+const LEADS=[
+  {id:'fineco',day:1,name:'ФинЭко',site:'fineco.kg',hi:true,ch:'wa',wa:'996701499999',contact:'WhatsApp +996 701 49 99 99 · uchet312pro@gmail.com',
+   d:'ведёте учёт в 1С и проверяете ЭСФ для торговых, производственных и IT-компаний',p:'С таким набором отраслей ЭСФ, наверное, приходится сверять пачками каждый месяц.'},
+  {id:'uchetplus',day:1,name:'Учёт Плюс',site:'uchetplus.kg',hi:true,ch:'wa',wa:'996555550268',contact:'WhatsApp +996 555 550 268 · тел. +996 555 005 335',
+   d:'ведёте бухгалтерию под ключ для ресторанов, IT и иностранных компаний и держите в команде 1С-специалиста',p:'Раз у вас в команде свой 1С-специалист, про интеграцию с 1С договориться будет проще.'},
+  {id:'unilex',day:1,name:'UniLex',site:'unilex.kg',ch:'wa',wa:'996558054356',contact:'WhatsApp +996 558 054 356 · office@unilex.kg',
+   d:'ведёте бухгалтерский и налоговый аутсорсинг и восстанавливаете учёт',p:'Восстановление учёта обычно самая муторная часть, там много ручной сверки документов.'},
+  {id:'buhfin',day:1,name:'BUHFIN',site:'buh-fin.com',ch:'wa',wa:'996555119922',contact:'WhatsApp +996 555 119 922 · appolo.bish@gmail.com',
+   d:'ведёте бухгалтерию для транспортных, строительных, туристических и IT-компаний',p:'У транспорта и стройки документов обычно больше всего, как раз на них мы и экономим время.'},
+  {id:'viprofin',day:1,name:'VIProFinance',site:'glavbuh.kg',ch:'wa',wa:'996550631605',contact:'WhatsApp +996 550 631 605 · viprofin@mail.ru',
+   d:'с 2010 года ведёте бухгалтерию ОсОО и ИП',p:'За столько лет клиентов наверняка много, а держать сроки по каждому вручную тяжело.'},
+  {id:'tochka',day:1,name:'Точка',site:'bbu.kg',ch:'wa',wa:'996707807507',contact:'WhatsApp +996 707 807 507 · tochka@bbu.kg',
+   d:'ведёте бухгалтерию в двух офисах и помогаете клиентам с регистрацией, ЭЦП и маркировкой',p:'Когда офиса два, наверное, особенно важно видеть всех клиентов и сроки в одном месте.'},
+  {id:'aridan',src:'Instagram',day:2,name:'ARIDAN',site:'instagram.com/aridan.kg',ch:'wa',wa:'996559181212',contact:'WhatsApp +996 559 181 212 · Instagram @aridan.kg',
+   d:'ведёте учёт, налоги и отчётность для бизнеса и собрали большую аудиторию в Instagram',p:'С такой аудиторией в Instagram заявок в директ и WhatsApp, думаю, немало.'},
+  {id:'leader',day:2,name:'Лидер Консалтинг',site:'leader-consulting.kg',hi:true,ch:'mail',contact:'leader-consulting@mail.ru · тел. +996 556 188 449',
+   d:'ведёте учёт в 1С для самых разных компаний, от нулевых отчётов до строительства и производства',p:'Когда клиенты настолько разные, сроки и отчёты легко начинают разъезжаться.'},
+  {id:'acf',day:2,name:'Аутсорсинг Бухгалтерия',site:'acf.kg',ch:'mail',contact:'zismaza0701@gmail.com · тел. +996 559 777 874',
+   d:'ведёте учёт, зарплату и кадры по понятным пакетам',p:'С пакетами важно понимать, сколько времени реально уходит на каждого клиента.'},
+  {id:'smartteam',day:2,name:'Смарт Тим',site:'smartteam.kg',ch:'mail',contact:'smartteamkg@yandex.com · тел. 0 700 55 96 99',
+   d:'ведёте учёт и отчётность с понятными пакетами для ИП и юрлиц',p:'С фиксированными пакетами важно, чтобы на клиента не уходило больше часов, чем заложено.'},
+  {id:'auditcenter',day:2,name:'Центр Профессионального Аудита',site:'auditcenter.kg',ch:'call',contact:'тел. +996 555 77 63 15 · Instagram @auditcenter.kg',
+   d:'с 2008 года ведёте учёт и сопровождаете клиентов на налоговых проверках',p:'Перед проверками особенно важно, чтобы все ЭСФ и документы сходились с 1С.'},
+  {id:'mazars',day:2,name:'Forvis Mazars',site:'forvismazars.com/kg',hi:true,ch:'form',contact:'форма на сайте · тел. +996 312 88 21 55',
+   d:'ведёте бухгалтерию международных компаний и настраиваете отчёты в 1С для руководства',p:'Международным клиентам отчёты обычно нужны в разных разрезах, и это хорошо автоматизируется.'},
+];
+const NEXT=[['Consultant.','5 · 110 оценок'],['Аманат Эксперт','5 · 72'],['Про Консалт','5 · 70'],['Наутилус','4.8 · 49'],['HighTech Audit','5 · 34'],['Инвойс Плюс','5 · 29'],['KLV. Эксперт','5 · 29'],['БухФин Сервис','5 · 27'],['Тайминг','5 · 26'],['Salyk Solution','5 · 25'],['Тыш Булак','5 · 21'],['Триумф Эксперт','5 · 21']];
+
+const waText=l=>`Здравствуйте! Я Курманбек, делаю IT-решения для бухгалтерских компаний.
+
+Посмотрел ваш ${l.src||'сайт'}: вы ${l.d}. ${l.p}
+
+Мы как раз собрали систему под такую работу. Заявка из WhatsApp сама попадает в Битрикс, у каждой компании-клиента своя карточка со сроками и чек-листом, а ЭСФ сверяется с 1С без ручного перебора. Отчёты всё так же проверяет ваш бухгалтер, просто рутины становится сильно меньше.
+
+Вот демо, там можно всё потыкать: ${DEMO}
+Этапы и цены здесь: ${KP}
+
+Если откликается, давайте созвонимся минут на 15? Вы расскажете, как у вас всё устроено, а я покажу, что можно забрать на автомат.`;
+const mailSubj='Автоматизация рутины в бухгалтерии, есть демо';
+const mailText=l=>`Здравствуйте!
+
+Меня зовут Курманбек Нурматов, у меня команда из 5 человек: программисты, аналитик, дизайнер и маркетолог. Мы делаем систему для компаний, которые ведут бухгалтерию клиентов.
+
+Посмотрел ваш ${l.src||'сайт'}: вы ${l.d}. ${l.p}
+
+Что умеет система:
+• заявки из WhatsApp сами попадают в Битрикс24;
+• у каждой компании-клиента своя карточка со сроками и чек-листом;
+• документы распознаются и превращаются в черновики в 1С;
+• ЭСФ сверяются с 1С, черновики отчётов готовятся заранее, а проверяет их ваш бухгалтер.
+
+Демо, его можно открыть и потыкать: ${DEMO}
+Этапы и цены: ${KP}
+
+Если интересно, давайте созвонимся минут на 15. Расскажете, как у вас устроена работа, а я покажу, что из этого можно автоматизировать.
+
+С уважением,
+Курманбек Нурматов
+ИП Нурматов Курманбек`;
+const remind=`Здравствуйте! Пишу ещё раз, вдруг прошлое сообщение затерялось. Вот демо системы для бухгалтерии: ${DEMO}
+Если сейчас неактуально, просто напишите, больше не буду беспокоить.`;
+const CH={wa:'WhatsApp',mail:'Почта',call:'Звонок или Instagram',form:'Форма на сайте'};
+
+let sent={};
+try{sent=JSON.parse(localStorage.getItem('buh-outreach-1')||'{}')}catch(e){}
+const save=()=>{try{localStorage.setItem('buh-outreach-1',JSON.stringify(sent))}catch(e){}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let tt;const toast=t=>{const e=document.getElementById('toast');e.textContent=t;e.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('show'),1800)};
+
+function textFor(l){return l.ch==='wa'?waText(l):mailText(l)}
+function card(l){
+  const s=sent[l.id], isMail=l.ch!=='wa';
+  const wa=l.ch==='wa'?`<a class="btn btn-wa" href="https://wa.me/${l.wa}?text=${encodeURIComponent(waText(l))}" target="_blank" rel="noopener">Открыть WhatsApp</a>`:'';
+  return `<article class="card ${s?'sent':''}" id="c-${l.id}">
+    <div><h3>${esc(l.name)} ${l.hi?'<span class="pill hi">высокий приоритет</span>':''}<span class="pill">${CH[l.ch]}</span></h3>
+      <div class="meta">${esc(l.site)}</div><div class="contact">${esc(l.contact)}</div></div>
+    <div class="when">${s?'отправлено '+s:''}</div>
+    <div class="msg">${isMail?`<span class="subj">Тема: ${esc(mailSubj)}</span>`:''}${esc(textFor(l))}</div>
+    <div class="acts">${wa}
+      <button class="btn ${l.ch==='wa'?'btn-line':'btn-dark'}" data-copy="${l.id}">Скопировать текст</button>
+      ${isMail?`<button class="btn btn-line" data-copysubj="1">Скопировать тему</button>`:''}
+      <button class="btn btn-line" data-remind="1">Скопировать напоминание</button>
+      <label class="done"><input type="checkbox" data-sent="${l.id}" ${s?'checked':''} id="s-${l.id}">Отправлено</label>
+    </div>
+  </article>`;
+}
+function render(){
+  const days=[1,2];
+  document.getElementById('list').innerHTML=days.map(d=>{
+    const ls=LEADS.filter(l=>l.day===d);
+    return `<div class="day"><h2>День ${d}</h2><span>${d===1?'6 сообщений в WhatsApp':'WhatsApp, почта, звонок и форма на сайте'}</span></div>${ls.map(card).join('')}`;
+  }).join('');
+  const n=Object.keys(sent).length;
+  document.getElementById('ptext').textContent=n+' из '+LEADS.length;
+  document.getElementById('pbar').style.width=(n/LEADS.length*100)+'%';
+}
+document.getElementById('next').innerHTML=NEXT.map(([n,r])=>`<li><a href="https://2gis.kg/bishkek/search/${encodeURIComponent(n)}" target="_blank" rel="noopener">${esc(n)}</a><span class="r">${r}</span></li>`).join('');
+
+async function copy(t){
+  try{await navigator.clipboard.writeText(t);toast('Скопировано')}
+  catch(e){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('Скопировано')}catch(_){toast('Выделите текст и скопируйте вручную')}ta.remove()}
+}
+document.addEventListener('click',e=>{
+  const c=e.target.closest('[data-copy]'); if(c){copy(textFor(LEADS.find(l=>l.id===c.dataset.copy)));return}
+  if(e.target.closest('[data-copysubj]')){copy(mailSubj);return}
+  if(e.target.closest('[data-remind]')){copy(remind);return}
+});
+document.addEventListener('change',e=>{
+  const id=e.target.dataset.sent; if(!id) return;
+  if(e.target.checked){const d=new Date();sent[id]=d.getDate()+'.'+String(d.getMonth()+1).padStart(2,'0')}else delete sent[id];
+  save();render();
+});
+render();
+</script>
+
+</body></html>
