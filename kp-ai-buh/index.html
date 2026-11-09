@@ -1,0 +1,422 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"></head><body>
+<title>БухПульт для бухгалтерии</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: документ-КП в визуальном языке демо — светлый фон, белые блоки с крупным скруглением,
+   чёрная обложка с лаймовым свечением, лайм только для итогов и главного действия. Одна тема. */
+:root{
+  --bg:#ECECF0; --surface:#FFFFFF; --soft:#F4F4F7; --line:#E3E3E8;
+  --ink:#0E0E10; --ink-2:#3C3C43; --muted:#6B6B74;
+  --dark:#0E0E10; --dark-2:#1C1C21; --dark-3:#2A2A31; --on-dark:#F5F5F7; --on-dark-muted:#A3A3AD;
+  --lime:#D7F542; --lime-soft:#F2FBCB;
+  --r-xl:28px; --r-lg:22px; --r-md:16px;
+  --f:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+::selection{background:var(--lime);color:var(--ink)}
+body{background:var(--bg);color:var(--ink);font-family:var(--f);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 72px;display:flex;flex-direction:column;gap:12px}
+h1,h2,h3{margin:0;text-wrap:balance;letter-spacing:-.02em;font-weight:600}
+p{margin:0}
+.num{font-variant-numeric:tabular-nums}
+a{color:inherit}
+
+/* обложка */
+.cover{position:relative;background:var(--dark);color:var(--on-dark);border-radius:32px;padding:28px 32px 32px;overflow:hidden}
+.cover::before{content:"";position:absolute;inset:0;background:radial-gradient(42% 80% at 4% 120%,rgba(215,245,66,.6),rgba(215,245,66,.14) 55%,transparent 100%);pointer-events:none}
+.cover > *{position:relative}
+.cover-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px}
+.mark{width:36px;height:36px;border-radius:50%;background:var(--lime);color:var(--ink);display:grid;place-items:center;font-size:13px}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:99px;padding:4px 12px;font-size:12.5px;font-weight:600}
+.pill.lime{background:var(--lime);color:var(--ink)}
+.pill.dark{background:var(--dark-3);color:var(--on-dark)}
+.cover h1{font-size:44px;line-height:1.05;letter-spacing:-.035em;margin-top:56px;max-width:16ch}
+.cover .lead{margin-top:16px;color:#D0D0D6;font-size:16.5px;max-width:56ch}
+.cover-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:40px}
+.cm{background:var(--dark-2);border:1px solid var(--dark-3);border-radius:18px;padding:12px 16px}
+.cm .l{font-size:12px;color:var(--on-dark-muted)}
+.cm .v{font-weight:600;margin-top:2px}
+.cta{display:inline-flex;align-items:center;gap:10px;margin-top:22px;background:var(--lime);color:var(--ink);text-decoration:none;font-weight:600;border-radius:99px;padding:12px 20px}
+.cta:hover{background:#C6E82E}
+.cta svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* секции */
+.sec{background:var(--surface);border-radius:var(--r-xl);padding:28px 30px}
+.sec-h{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.sec-h h2{font-size:26px}
+.sec-h .aside{color:var(--muted);font-size:14px;max-width:52ch}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tile{background:var(--soft);border-radius:var(--r-md);padding:16px 18px}
+.tile h3{font-size:16px}
+.tile p{color:var(--ink-2);font-size:14px;margin-top:6px}
+.tile.dark{background:var(--dark);color:var(--on-dark)}
+.tile.dark p{color:#D0D0D6}
+.tile.lime{background:var(--lime)}
+.goal{margin-top:12px;display:flex;gap:14px;align-items:flex-start;background:var(--lime);border-radius:var(--r-md);padding:16px 18px}
+.goal b{display:block;font-size:16px}
+.goal p{color:var(--ink-2);font-size:14px;margin-top:4px}
+
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.turnkey{margin-top:12px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:var(--dark);color:var(--on-dark);border-radius:var(--r-md);padding:18px 20px}
+.turnkey b{font-size:16px}
+.turnkey p{color:#D0D0D6;font-size:14px;margin-top:4px;max-width:62ch}
+
+/* уровни автоматизации */
+.lv{display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px}
+.lv::before{content:"";width:10px;height:10px;border-radius:50%;flex:none;box-sizing:border-box}
+.lv.a::before{background:var(--lime);border:2px solid var(--ink)}
+.lv.d::before{border:2px solid var(--ink)}
+.lv.m::before{background:#C9C9D1}
+
+/* этапы */
+.stages{display:flex;flex-direction:column;gap:10px}
+.stage{display:grid;grid-template-columns:56px minmax(0,1fr) 190px;gap:18px;align-items:start;background:var(--soft);border-radius:var(--r-lg);padding:18px 20px}
+.stage .k{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:16px;background:var(--surface)}
+.stage h3{font-size:17px}
+.stage .when{color:var(--muted);font-size:13.5px;margin-top:2px}
+.stage ul{margin:10px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px}
+.stage li{display:grid;grid-template-columns:14px 1fr;gap:8px;font-size:14px;color:var(--ink-2)}
+.stage li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ink);margin-top:8px}
+.stage .res{margin-top:10px;font-size:13.5px}
+.stage .res b{font-weight:600}
+.price{text-align:right}
+.price .v{font-size:24px;font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.price .l{font-size:12.5px;color:var(--muted)}
+.stage.done{background:var(--dark);color:var(--on-dark)}
+.stage.done .k{background:var(--lime);color:var(--ink)}
+.stage.done .when,.stage.done .price .l{color:var(--on-dark-muted)}
+.stage.done li{color:#D0D0D6} .stage.done li::before{background:var(--lime)}
+.badge-ready{display:inline-block;margin-left:8px;vertical-align:middle;font-size:12px;font-weight:600;background:var(--lime);color:var(--ink);border-radius:99px;padding:1px 10px;letter-spacing:0}
+
+/* таблица стоимости */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:14.5px;min-width:560px}
+th{text-align:left;font-weight:500;color:var(--muted);font-size:13px;padding:0 14px 10px}
+td{padding:14px;border-top:1px solid var(--line);vertical-align:top}
+td.r,th.r{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+td small{display:block;color:var(--muted);font-size:13px}
+tr.total td{border-top:0;background:var(--lime);font-weight:600;font-size:16px}
+tr.total td:first-child{border-radius:var(--r-md) 0 0 var(--r-md)}
+tr.total td:last-child{border-radius:0 var(--r-md) var(--r-md) 0}
+tr.sub td{background:var(--soft);font-weight:600}
+tr.sub td:first-child{border-radius:var(--r-md) 0 0 var(--r-md)}
+tr.sub td:last-child{border-radius:0 var(--r-md) var(--r-md) 0}
+tr.gap td{border:0;padding:4px}
+.fine{font-size:13px;color:var(--muted);margin-top:14px}
+
+/* форматы работы */
+.formats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.fmt{border-radius:var(--r-lg);padding:22px;display:flex;flex-direction:column;gap:12px;background:var(--soft)}
+.fmt.rec{background:var(--dark);color:var(--on-dark)}
+.fmt h3{font-size:19px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.fmt .big{font-size:30px;font-weight:600;letter-spacing:-.035em;font-variant-numeric:tabular-nums}
+.fmt .big small{font-size:14px;font-weight:500;color:var(--muted);letter-spacing:0}
+.fmt.rec .big small{color:var(--on-dark-muted)}
+.fmt ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px;font-size:14px}
+.fmt li{display:grid;grid-template-columns:14px 1fr;gap:8px;color:var(--ink-2)}
+.fmt.rec li{color:#D0D0D6}
+.fmt li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ink);margin-top:8px}
+.fmt.rec li::before{background:var(--lime)}
+.fmt .who{font-size:13.5px;color:var(--muted)}
+.fmt.rec .who{color:var(--on-dark-muted)}
+
+/* метрики */
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.metric{background:var(--soft);border-radius:var(--r-md);padding:16px 18px}
+.metric b{display:block;font-size:15px}
+.metric span{display:block;color:var(--muted);font-size:13.5px;margin-top:4px}
+
+/* условия */
+.cond{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.cond .tile ul{margin:8px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--ink-2)}
+.cond .tile li{display:grid;grid-template-columns:14px 1fr;gap:8px}
+.cond .tile li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ink);margin-top:8px}
+
+/* шаги и контакты */
+.next{position:relative;background:var(--dark);color:var(--on-dark);border-radius:32px;padding:28px 30px;overflow:hidden}
+.next::before{content:"";position:absolute;inset:0;background:radial-gradient(40% 90% at 100% -20%,rgba(215,245,66,.45),transparent 100%);pointer-events:none}
+.next > *{position:relative}
+.next h2{font-size:26px}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px}
+.step{background:var(--dark-2);border:1px solid var(--dark-3);border-radius:18px;padding:16px}
+.step .k{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;background:var(--lime);color:var(--ink)}
+.step b{display:block;margin-top:12px;font-size:15px}
+.step span{display:block;color:var(--on-dark-muted);font-size:13.5px;margin-top:4px}
+.contacts{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-top:26px;padding-top:20px;border-top:1px solid var(--dark-3)}
+.contacts .l{font-size:12.5px;color:var(--on-dark-muted)}
+.contacts .v{font-weight:600;font-size:16px;margin-top:2px}
+.contacts .row{display:flex;gap:28px;flex-wrap:wrap}
+
+
+/* чередование секций: белая → тёмная → белая → без подложки → лаймовая … */
+.sec.dark{background:var(--dark);color:var(--on-dark)}
+.sec.dark .sec-h .aside{color:var(--on-dark-muted)}
+.sec.dark .tile{background:var(--dark-2);border:1px solid var(--dark-3)}
+.sec.dark .tile p{color:#C9C9D0}
+.sec.dark .tile.dark{background:var(--lime);border-color:var(--lime);color:var(--ink)}
+.sec.dark .tile.dark p,.sec.dark .tile.lime p{color:var(--ink-2)}
+.sec.dark .tile.lime{background:var(--lime);border-color:var(--lime);color:var(--ink)}
+.sec.dark .lv.a::before{border-color:var(--on-dark)}
+.sec.dark .lv.d::before{border-color:var(--on-dark)}
+.sec.dark .lv.m::before{background:#55555F}
+.sec.dark .metric{background:var(--dark-2);border:1px solid var(--dark-3)}
+.sec.dark .metric span{color:var(--on-dark-muted)}
+.sec.bare{background:transparent;padding:14px 6px}
+.sec.bare .stage{background:var(--surface)}
+.sec.bare .stage .k{background:var(--soft)}
+.sec.bare .stage.done{background:var(--dark)}
+.sec.bare .stage.done .k{background:var(--lime)}
+.sec.bare .tile{background:var(--surface)}
+.sec.lime{background:var(--lime)}
+.sec.lime .sec-h .aside{color:var(--ink-2)}
+.sec.lime .fmt{background:var(--surface)}
+.sec.lime .fmt.rec{background:var(--dark)}
+
+@media (max-width:820px){
+  .cover h1{font-size:34px;margin-top:40px}
+  .cover-meta,.steps{grid-template-columns:repeat(2,1fr)}
+  .grid3,.metrics,.grid4{grid-template-columns:1fr 1fr}
+  .formats,.cond,.grid2{grid-template-columns:1fr}
+  .stage{grid-template-columns:44px minmax(0,1fr)}
+  .stage .price{grid-column:2;text-align:left}
+  .sec,.next{padding:22px 20px}
+}
+@media (max-width:520px){
+  .cover{padding:22px 20px 24px;border-radius:26px}
+  .cover h1{font-size:29px}
+  .grid3,.grid4,.metrics,.steps{grid-template-columns:1fr}
+  .cover-meta{grid-template-columns:1fr 1fr;gap:8px;margin-top:28px}
+  .cm{padding:10px 12px;border-radius:14px}
+  .sec-h h2,.next h2{font-size:22px}
+  .sec-h{margin-bottom:16px}
+  .wrap{gap:10px}
+  .sec,.next{padding:20px 16px;border-radius:24px}
+  .tile{padding:14px 16px}
+  .stage{grid-template-columns:1fr;gap:10px;padding:16px;border-radius:18px}
+  .stage .k{width:36px;height:36px;font-size:14px}
+  .stage .price{grid-column:auto;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--line)}
+  .stage.done .price{border-color:var(--dark-3)}
+  .price .v{font-size:22px}
+  .fmt{padding:18px 16px}
+  .fmt .big{font-size:26px}
+  .step{display:grid;grid-template-columns:30px 1fr;gap:2px 12px;align-items:start}
+  .step b{margin-top:4px}
+  .step .k{grid-row:1/3}
+  .step span:not(.k){grid-column:2;margin-top:0}
+  .contacts .cta{width:100%;justify-content:center}
+}
+@media (max-width:640px){
+  .tbl-wrap{overflow:visible}
+  table{min-width:0;display:block}
+  thead{display:none}
+  tbody{display:flex;flex-direction:column;gap:0}
+  tr{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:12px 0;border-top:1px solid var(--line)}
+  tr.gap{display:none}
+  td{display:block;padding:0;border:0}
+  td:first-child{grid-column:1/-1;font-weight:500}
+  td:nth-child(2){color:var(--muted);font-size:13.5px}
+  td.r{font-weight:600}
+  tr.total,tr.sub{border:0;border-radius:var(--r-md);padding:14px 16px;margin-top:10px}
+  tr.total{background:var(--lime)} tr.sub{background:var(--soft)}
+  tr.total td,tr.sub td{background:none!important;border-radius:0!important}
+  tr.total td:nth-child(2){color:var(--ink-2)}
+}
+@media print{
+  body{background:#fff;font-size:13px}
+  .wrap{padding:0;gap:10px}
+  .sec,.cover,.next,.stage,.fmt{break-inside:avoid}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+
+<div class="wrap">
+
+  <header class="cover">
+    <div class="cover-top">
+      <div class="brand"><span class="mark">БП</span>БухПульт</div>
+      <span class="pill dark">Коммерческое предложение</span>
+    </div>
+    <h1>ИИ-автоматизация бухгалтерского аутсорсинга</h1>
+    <p class="lead">Разработка и внедрение под ключ командой из 5 специалистов. Связываем WhatsApp, Битрикс24, 1С, ЭСФ и Салык в одну систему. Рутину берёт на себя ИИ, бухгалтеры проверяют и отвечают за результат, руководитель каждую неделю видит цифры.</p>
+    <a class="cta" href="../buhpult/">Открыть демо-версию
+      <svg viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
+    <div class="cover-meta">
+      <div class="cm"><div class="l">Для</div><div class="v">Руководства компании</div></div>
+      <div class="cm"><div class="l">Исполнитель</div><div class="v">ИП Нурматов Курманбек</div></div>
+      <div class="cm"><div class="l">Дата</div><div class="v num">9 ноября 2026</div></div>
+      <div class="cm"><div class="l">Действует до</div><div class="v num">31 декабря 2026</div></div>
+    </div>
+  </header>
+
+  <section class="sec">
+    <div class="sec-h"><h2>Что мешает расти</h2><span class="aside">С чем чаще всего сталкиваются компании, которые ведут бухгалтерию клиентов</span></div>
+    <div class="grid2">
+      <div class="tile"><h3>Клиенты из WhatsApp теряются</h3><p>Заявка приходит в переписку и не всегда доходит до Битрикс24. Боль клиента и следующий шаг нигде не зафиксированы.</p></div>
+      <div class="tile"><h3>Знания о компаниях в головах</h3><p>У каждого исполнителя свои компании, а их режимы, особенности и договорённости хранятся в памяти и переписке.</p></div>
+      <div class="tile"><h3>Много ручной рутины</h3><p>Запросы документов, сверка ЭСФ, разноска первички, подготовка отчётов. Здесь же рождаются ошибки и просрочки.</p></div>
+      <div class="tile"><h3>Системы не связаны</h3><p>WhatsApp, Битрикс24, 1С на локальном сервере, ЭСФ и Салык работают по отдельности, данные переносятся руками.</p></div>
+    </div>
+    <div class="goal"><div><b>Цель: максимум автоматизации при минимуме ручного участия</b><p>Отчёты в ГНС перед отправкой всегда проверяет ответственный бухгалтер. Результат измеряется метриками каждую неделю.</p></div></div>
+  </section>
+
+  <section class="sec dark">
+    <div class="sec-h"><h2>Решение</h2><span class="aside">Рабочее место БухПульт. Первый этап уже собран в демо-версии</span></div>
+    <div class="grid3">
+      <div class="tile dark"><h3>Карточка каждой компании</h3><p>Налоговый режим, ответственный, сроки, чек-лист месяца и прогресс. Проблемные компании всегда наверху.</p></div>
+      <div class="tile"><h3>ИИ с контекстом компании</h3><p>Отвечает по конкретному клиенту, готовит черновики писем и документов, предупреждает о рисках.</p></div>
+      <div class="tile"><h3>WhatsApp → Битрикс24</h3><p>ИИ разбирает переписку, понимает, что нужно клиенту, готовит ответ и создаёт сделку.</p></div>
+      <div class="tile"><h3>Связка с 1С</h3><p>Распознавание накладных и актов из фото, черновики проводок в базе на вашем сервере.</p></div>
+      <div class="tile"><h3>ЭСФ и Салык через API</h3><p>Сверка счетов-фактур и черновики отчётов, которые бухгалтер проверяет и отправляет.</p></div>
+      <div class="tile lime"><h3>Команда и метрики</h3><p>Рейтинг исполнителей за работу в срок и отчёт руководителю каждый понедельник.</p></div>
+    </div>
+    <div class="sec-h" style="margin:26px 0 12px"><h2 style="font-size:19px">Кто делает работу</h2><span class="aside">У каждой задачи в системе есть одна из трёх меток</span></div>
+    <div class="grid3">
+      <div class="tile"><span class="lv a">Авто</span><p>Делает робот: запросы документов, напоминания, сверка ЭСФ, создание сделок.</p></div>
+      <div class="tile"><span class="lv d">Черновик ИИ</span><p>ИИ готовит, бухгалтер проверяет и подтверждает: отчёты, проводки, ответы клиентам.</p></div>
+      <div class="tile"><span class="lv m">Вручную</span><p>Пока делает человек. С каждым этапом таких задач становится меньше.</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="turnkey">
+    <div class="sec-h"><h2>Вы платите не за чат с ИИ, а за работающую систему</h2><span class="aside">ИИ — только одна часть. Чтобы всё работало каждый день, нужны разные специалисты. В нашей команде их пятеро, и они закрывают все роли</span></div>
+    <div class="grid4">
+      <div class="tile"><h3>Анализ процессов</h3><p>Разбор работы бухгалтеров по каждой компании, налоговый календарь, техническое задание.</p></div>
+      <div class="tile"><h3>Интеграции</h3><p>API Битрикс24, WhatsApp Business, ЭСФ и Салыка, обмен с 1С через HTTP-сервисы.</p></div>
+      <div class="tile dark"><h3>Базы данных и SQL-сверки</h3><p>Единая база компаний и задач. Сверка ЭСФ с 1С и банковскими выписками, поиск расхождений и дублей.</p></div>
+      <div class="tile"><h3>ИИ-инженерия</h3><p>Контекст по каждой компании, поиск по документам, проверка ответов модели, защита от её ошибок.</p></div>
+      <div class="tile"><h3>Сервер и безопасность</h3><p>Развёртывание на вашем сервере, резервные копии, журнал действий, роли и доступы, хранение ЭЦП.</p></div>
+      <div class="tile"><h3>Интерфейс</h3><p>Рабочее место бухгалтера и экран руководителя, как в демо-версии.</p></div>
+      <div class="tile"><h3>Тестирование и запуск</h3><p>Проверка на реальных данных, работа параллельно со старым процессом до полного перехода.</p></div>
+      <div class="tile"><h3>Обучение и документация</h3><p>Инструкции, обучение сотрудников, передача знаний, чтобы система не зависела от одного человека.</p></div>
+    </div>
+    <div class="sec-h" style="margin:26px 0 12px"><h2 style="font-size:19px">Команда проекта: 5 специалистов</h2><span class="aside">Работает над системой в варианте «под ключ». Руководитель проекта и контакт для вас: ИП Нурматов Курманбек</span></div>
+    <div class="grid4">
+      <div class="tile dark"><h3>2 программиста</h3><p>Интеграции с WhatsApp, Битрикс24, 1С, ЭСФ и Салыком, базы данных и SQL-сверки, сервер, ИИ.</p></div>
+      <div class="tile"><h3>Аналитик</h3><p>Разбор процессов бухгалтеров, налоговый календарь, техническое задание, еженедельные метрики.</p></div>
+      <div class="tile"><h3>Дизайнер</h3><p>Удобное рабочее место бухгалтера и понятный экран руководителя.</p></div>
+      <div class="tile"><h3>Маркетолог</h3><p>Воронка WhatsApp, тексты бота и сценарии ответов, запуск продвижения ваших услуг.</p></div>
+    </div>
+    <div class="turnkey"><div><b>Под ключ: от аудита до обученной команды</b><p>Одна команда отвечает за весь результат: не нужно искать отдельно интегратора 1С, программиста Битрикс24, специалиста по данным и ИИ, дизайнера и маркетолога.</p></div></div>
+  </section>
+
+  <section class="sec bare">
+    <div class="sec-h"><h2>Этапы и сроки</h2><span class="aside">Каждый этап заканчивается работающим результатом и актом. Общий срок 4–6 месяцев</span></div>
+    <div class="stages">
+      <div class="stage">
+        <span class="k">0</span>
+        <div><h3>Аудит и проектирование</h3><div class="when">1–2 недели</div>
+          <ul><li>Получаем доступы и проверяем 1С, Битрикс24 или вашу CRM, WhatsApp, ЭСФ и Салык</li><li>Разбираем процессы 2–3 исполнителей по их компаниям</li><li>Собираем налоговый календарь и шаблоны чек-листов по режимам</li></ul>
+          <p class="res"><b>Результат:</b> карта процессов, список автоматизаций по приоритету, точные сроки и цены этапов 2 и 3.</p></div>
+        <div class="price"><div class="v">30 000</div><div class="l">сом</div></div>
+      </div>
+      <div class="stage done">
+        <span class="k">1</span>
+        <div><h3>WhatsApp, ИИ и Битрикс24 <span class="badge-ready">показан в демо</span></h3><div class="when">4–6 недель</div>
+          <ul><li>Подключение WhatsApp: разбор диалога ИИ, черновик ответа, сделка в Битрикс24</li><li>Карточки всех компаний с закреплённым контекстом для ИИ</li><li>Чек-листы и дедлайны по налоговому календарю, напоминания</li><li>ИИ-ассистент по каждой компании, рейтинг команды, еженедельный отчёт</li></ul>
+          <p class="res"><b>Результат:</b> ни одного потерянного лида, все сроки по всем компаниям на одном экране.</p></div>
+        <div class="price"><div class="v">160 000</div><div class="l">сом</div></div>
+      </div>
+      <div class="stage">
+        <span class="k">2</span>
+        <div><h3>1С на вашем сервере</h3><div class="when">6–8 недель</div>
+          <ul><li>Безопасное подключение к базам 1С на локальном сервере</li><li>Распознавание накладных, актов и выписок из фото и PDF</li><li>Черновики проводок в 1С на проверку бухгалтеру</li><li>SQL-сверка данных 1С с банковскими выписками: расхождения видны до сдачи отчётов</li></ul>
+          <p class="res"><b>Результат:</b> первичка разносится без ручного набора.</p></div>
+        <div class="price"><div class="v">205 000</div><div class="l">сом, уточняется после аудита</div></div>
+      </div>
+      <div class="stage">
+        <span class="k">3</span>
+        <div><h3>ЭСФ и Салык через API</h3><div class="when">6–8 недель</div>
+          <ul><li>Автоматическая сверка входящих и исходящих ЭСФ</li><li>Черновики отчётов по НДС, налогу с продаж, ПН и соцфонду</li><li>Отправка только после проверки ответственным, с журналом действий</li></ul>
+          <p class="res"><b>Результат:</b> отчёты готовятся сами, бухгалтер проверяет и отправляет.</p></div>
+        <div class="price"><div class="v">205 000</div><div class="l">сом, уточняется после аудита</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec lime" id="formats">
+    <div class="sec-h"><h2>Как работаем: выбор за вами</h2><span class="aside">Купить готовую систему вместе с работой команды из 5 человек или взять IT-специалиста на постоянной основе</span></div>
+    <div class="formats">
+      <div class="fmt">
+        <h3>А. Разработка под ключ <span class="pill dark">команда из 5 человек</span></h3>
+        <div class="big num">600 000 <small>сом за систему целиком</small></div>
+        <ul><li>Платите один раз за готовую работающую систему, этапами по актам</li><li>Над проектом работает команда: 2 программиста, аналитик, дизайнер и маркетолог</li><li>Дизайнер и маркетолог помогают запустить продвижение ваших услуг, не нужно искать и нанимать людей</li><li>Система, код и документация остаются у вас</li><li>30 дней гарантийных исправлений после каждого этапа</li><li>Сопровождение по желанию: 80 000 сом в месяц</li></ul>
+        <p class="who">Подходит, если нужен готовый продукт и команда, которая запустит его и продвижение, без найма новых сотрудников.</p>
+      </div>
+      <div class="fmt rec">
+        <h3>Б. Постоянное сотрудничество <span class="pill lime">развитие включено</span></h3>
+        <div class="big num">150 000 <small>сом/мес фиксированно</small></div>
+        <div class="big num" style="font-size:22px">+ 40 000 <small>сом за каждый запущенный этап</small></div>
+        <ul><li>IT-специалист в вашей команде: разработка, внедрение, обучение, поддержка</li><li>Те же этапы 0–3, плюс новые автоматизации по мере роста компании</li><li>Поддержка и доработки без отдельной оплаты</li></ul>
+        <p class="who">Подходит, если ИИ и автоматизация становятся постоянным направлением компании.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-h"><h2>Стоимость разработки под ключ</h2><span class="aside">Для варианта «разовая покупка». Оплата поэтапно, каждый этап закрывается актом</span></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Работа</th><th>Срок</th><th class="r">Стоимость, сом</th></tr></thead>
+        <tbody>
+          <tr><td>Этап 0. Аудит и проектирование</td><td>1–2 недели</td><td class="r">30 000</td></tr>
+          <tr><td>Этап 1. WhatsApp, ИИ и Битрикс24, карточки компаний</td><td>4–6 недель</td><td class="r">160 000</td></tr>
+          <tr><td>Этап 2. Интеграция с 1С, сверки и распознавание документов<small>Объём уточняется по итогам аудита</small></td><td>6–8 недель</td><td class="r">205 000</td></tr>
+          <tr><td>Этап 3. ЭСФ и Салык через API<small>Объём уточняется по итогам аудита</small></td><td>6–8 недель</td><td class="r">205 000</td></tr>
+          <tr class="gap"><td colspan="3"></td></tr>
+          <tr class="total"><td>Итого за систему под ключ</td><td>4–6 месяцев</td><td class="r">600 000</td></tr>
+          <tr class="gap"><td colspan="3"></td></tr>
+          <tr class="sub"><td>Сопровождение по желанию<small style="font-weight:400">поддержка, обучение новых сотрудников, еженедельные метрики, доработки до 20 часов в месяц</small></td><td>ежемесячно</td><td class="r">80 000 / мес</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="fine">Не входят в стоимость и оплачиваются компанией напрямую поставщикам: API языковой модели (примерно $50–300 в месяц в зависимости от объёма), провайдер WhatsApp Business API, сервер для интеграций при необходимости, лицензии Битрикс24 и 1С.</p>
+  </section>
+
+
+  <section class="sec dark">
+    <div class="sec-h"><h2>Метрики каждую неделю</h2><span class="aside">По понедельникам руководитель получает отчёт с цифрами</span></div>
+    <div class="metrics">
+      <div class="metric"><b>Лиды из WhatsApp</b><span>сколько пришло и сколько попало в Битрикс24</span></div>
+      <div class="metric"><b>Время первого ответа</b><span>в минутах, цель меньше 5</span></div>
+      <div class="metric"><b>Просрочки по компаниям</b><span>цель ноль</span></div>
+      <div class="metric"><b>Документы, распознанные ИИ</b><span>количество за неделю</span></div>
+      <div class="metric"><b>Черновики ИИ без правок</b><span>доля, растёт по мере обучения</span></div>
+      <div class="metric"><b>Сэкономленные часы</b><span>по каждой автоматизированной операции</span></div>
+    </div>
+  </section>
+
+  <section class="sec bare">
+    <div class="sec-h"><h2>Условия</h2></div>
+    <div class="cond">
+      <div class="tile"><h3>Оплата и гарантия</h3><ul><li>Каждый этап: 50% аванс, 50% после подписания акта</li><li>30 дней бесплатного исправления ошибок после запуска этапа</li><li>Код и документация принадлежат компании после оплаты этапа</li></ul></div>
+      <div class="tile"><h3>Данные и безопасность</h3><ul><li>Разрешение на передачу данных в языковую модель оформляем письменно</li><li>ЭЦП и ключи хранятся только на вашем сервере</li><li>Журнал действий системы, доступы по ролям</li></ul></div>
+      <div class="tile"><h3>Ответственность за отчёты</h3><ul><li>Система готовит черновики, отправку подтверждает ответственный бухгалтер</li><li>Ни один отчёт не уходит в ГНС без проверки человеком</li></ul></div>
+      <div class="tile"><h3>Что нужно от вас</h3><ul><li>Доступы: WhatsApp, Битрикс24, 1С, ключи API ЭСФ и Салыка</li><li>Один ответственный со стороны компании для согласований</li><li>1–2 часа в неделю исполнителей на этапе аудита и обучения</li></ul></div>
+    </div>
+  </section>
+
+  <section class="next">
+    <h2>Следующие шаги</h2>
+    <div class="steps">
+      <div class="step"><span class="k">1</span><b>Короткий созвон</b><span>15 минут: покажем демо и поймём, что болит у вас</span></div>
+      <div class="step"><span class="k">2</span><b>Договор</b><span>фиксируем этапы, сроки и условия по данным</span></div>
+      <div class="step"><span class="k">3</span><b>Доступы</b><span>WhatsApp, Битрикс24, 1С, API ЭСФ и Салыка</span></div>
+      <div class="step"><span class="k">4</span><b>Старт аудита</b><span>через 1–2 недели готовы точный план и цены</span></div>
+    </div>
+    <div class="contacts">
+      <div class="row">
+        <div><div class="l">Исполнитель</div><div class="v">ИП Нурматов Курманбек</div></div>
+      </div>
+      <a class="cta" style="margin-top:0" href="../buhpult/">Демо-версия
+        <svg viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
+    </div>
+  </section>
+
+</div>
+
+</body></html>
