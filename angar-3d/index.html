@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ангар 3D · этапы строительства</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500..800&family=Inter:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ink:#F3F1EA; --mute:#AEB3BC; --dim:#7D838E; --panel:rgba(17,19,23,.78); --line:rgba(255,255,255,.10);
+  --accent:#4F8DF5; --accent2:#2B5BA8; --ok:#9BE15D;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0E1013;color:var(--ink);font-family:Inter,Arial,sans-serif;overflow:hidden}
+#app{position:fixed;inset:0}
+canvas{display:block;touch-action:none}
+.glass{background:var(--panel);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:18px}
+/* header */
+#head{position:absolute;left:16px;top:16px;padding:16px 18px;display:flex;flex-direction:column;gap:12px;max-width:min(420px,calc(100vw - 32px))}
+#head h1{font:800 22px/1.15 Manrope,Arial;letter-spacing:-.3px}
+#head .sub{font-size:13px;color:var(--mute)}
+.params{display:flex;gap:8px;flex-wrap:wrap}
+.params label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1px}
+.params select{appearance:none;background:#1C2027;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:7px 26px 7px 10px;font:600 14px Inter;cursor:pointer;
+  background-image:linear-gradient(45deg,transparent 50%,#AEB3BC 50%),linear-gradient(135deg,#AEB3BC 50%,transparent 50%);background-position:calc(100% - 13px) 50%,calc(100% - 8px) 50%;background-size:5px 5px;background-repeat:no-repeat}
+/* tools right */
+#tools{position:absolute;right:16px;top:16px;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.btn{background:var(--panel);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:9px 14px;font:600 13px Inter;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:rgba(255,255,255,.28)}
+.btn.on{background:var(--accent2);border-color:var(--accent)}
+.seg{display:flex;gap:4px;padding:4px;border-radius:14px}
+.seg .btn{border:0;background:transparent;padding:7px 11px;border-radius:10px}
+.seg .btn.on{background:#2A2F38}
+/* bottom */
+#bottom{position:absolute;left:16px;right:16px;bottom:16px;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+#bottom>*{pointer-events:auto}
+#card{padding:18px 20px;max-width:560px;display:flex;flex-direction:column;gap:10px}
+#card .k{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);font-weight:600}
+#card h2{font:800 26px/1.1 Manrope,Arial;letter-spacing:-.4px}
+#card p{font-size:15px;line-height:1.5;color:#D4D7DD}
+#card .meta{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--mute)}
+#card .meta b{color:var(--ink);font-weight:600}
+#bar{padding:10px;display:flex;gap:10px;align-items:center}
+#bar .nav{flex:none;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;padding:0}
+#steps{flex:1;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;position:relative}
+#steps::-webkit-scrollbar{display:none}
+.step{flex:1 0 auto;min-width:96px;border:1px solid var(--line);background:#171A20;border-radius:12px;padding:8px 10px;cursor:pointer;text-align:left;color:var(--mute);font:500 12.5px/1.25 Inter;display:flex;flex-direction:column;gap:6px}
+.step .n{font:800 12px Manrope;color:var(--dim)}
+.step .track{height:3px;border-radius:2px;background:#2A2F38;overflow:hidden}
+.step .track i{display:block;height:100%;width:0;background:var(--accent);transition:width .5s}
+.step.done{color:#D4D7DD}.step.done .track i{width:100%}
+.step.cur{border-color:var(--accent);color:var(--ink);background:#1B2333}.step.cur .n{color:var(--accent)}
+#play.on{background:var(--accent2)}
+#hint{position:absolute;left:50%;top:18px;transform:translateX(-50%);font-size:12.5px;color:var(--mute);padding:8px 14px;border-radius:999px;transition:opacity .6s}
+@media (max-height:640px){#card p{display:none}#card{gap:6px}}
+@media (max-width:760px){
+  #head{padding:12px 14px;gap:8px}#head h1{font-size:18px}
+  #tools{top:auto;bottom:auto;left:16px;right:16px;top:var(--headH,150px);flex-direction:row;justify-content:space-between;align-items:center}
+  #tools .seg .btn{padding:6px 9px}
+  #xray{padding:8px 10px;font-size:0}#xray::after{content:'Каркас';font-size:13px}#xray.on::after{content:'Стены'}
+  #card{padding:12px 14px;gap:6px}#card h2{font-size:19px}#card p{font-size:13px;line-height:1.4}#card .meta{font-size:12px;gap:10px}
+  #hint{display:none}
+  .step{min-width:84px}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<div id="head" class="glass">
+  <div>
+    <h1 id="title">Склад 24 × 48 м</h1>
+    <div class="sub" id="subtitle">1 152 м² · высота 8 м · металлокаркас</div>
+  </div>
+  <div class="params">
+    <label>Ширина<select id="pW"><option>18</option><option selected>24</option><option>30</option></select></label>
+    <label>Длина<select id="pL"><option>36</option><option selected>48</option><option>60</option></select></label>
+    <label>Высота<select id="pH"><option>6</option><option selected>8</option><option>10</option></select></label>
+  </div>
+</div>
+
+<div id="tools">
+  <div class="seg glass" id="views">
+    <button class="btn on" data-v="iso">3/4</button>
+    <button class="btn" data-v="front">Фасад</button>
+    <button class="btn" data-v="top">Сверху</button>
+    <button class="btn" data-v="inside">Внутри</button>
+  </div>
+  <button class="btn" id="xray">Показать каркас</button>
+</div>
+
+<div id="hint" class="glass">Вращайте мышью или пальцем, колесо или щипок для масштаба</div>
+
+<div id="bottom">
+  <div id="card" class="glass">
+    <span class="k" id="cK">Этап 1 из 9</span>
+    <h2 id="cT"></h2>
+    <p id="cP"></p>
+    <div class="meta"><span>Срок: <b id="cD"></b></span><span>Материалы: <b id="cM"></b></span></div>
+  </div>
+  <div id="bar" class="glass">
+    <button class="btn nav" id="prev" aria-label="Назад">‹</button>
+    <div id="steps"></div>
+    <button class="btn nav" id="next" aria-label="Дальше">›</button>
+    <button class="btn" id="play">▶ Авто</button>
+  </div>
+</div>
+
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+/* ---------- renderer / scene ---------- */
+const app = document.getElementById('app');
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+app.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+{ // sky gradient
+  const c = document.createElement('canvas'); c.width = 2; c.height = 512;
+  const g = c.getContext('2d'); const gr = g.createLinearGradient(0, 0, 0, 512);
+  gr.addColorStop(0, '#6E9FD6'); gr.addColorStop(0.55, '#BFD6EC'); gr.addColorStop(1, '#E9EEF2');
+  g.fillStyle = gr; g.fillRect(0, 0, 2, 512);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; scene.background = t;
+}
+scene.fog = new THREE.Fog(0xDCE6EE, 160, 900);
+
+const camera = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.3, 3000);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.07;
+controls.maxPolarAngle = Math.PI * 0.495; controls.minDistance = 6; controls.maxDistance = 220;
+
+scene.add(new THREE.HemisphereLight(0xDDE8F5, 0x5A5F48, 0.9));
+const sun = new THREE.DirectionalLight(0xFFF3E2, 2.6);
+sun.position.set(-60, 80, -50); sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+Object.assign(sun.shadow.camera, { left: -70, right: 70, top: 70, bottom: -70, near: 10, far: 260 });
+sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.03;
+scene.add(sun);
+
+/* ---------- textures & materials ---------- */
+function noiseTex(base, spread, size = 256, rep = 1) {
+  const c = document.createElement('canvas'); c.width = c.height = size; const g = c.getContext('2d');
+  g.fillStyle = base; g.fillRect(0, 0, size, size);
+  const im = g.getImageData(0, 0, size, size), d = im.data;
+  for (let i = 0; i < d.length; i += 4) { const n = (Math.random() - .5) * spread; d[i] += n; d[i + 1] += n; d[i + 2] += n; }
+  g.putImageData(im, 0, 0);
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rep, rep); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+const mat = (o) => new THREE.MeshStandardMaterial(o);
+const M = {
+  grass: mat({ map: noiseTex('#6F8048', 26, 256, 60), roughness: 1 }),
+  gravel: mat({ map: noiseTex('#9C9383', 40, 256, 8), roughness: 1 }),
+  concrete: mat({ map: noiseTex('#B3B1AA', 18, 256, 6), roughness: .9 }),
+  asphalt: mat({ map: noiseTex('#36383B', 16, 256, 10), roughness: .95 }),
+  steel: mat({ color: 0x4E6A86, metalness: .55, roughness: .42 }),
+  steel2: mat({ color: 0x7E8C99, metalness: .6, roughness: .4 }),
+  brace: mat({ color: 0x2E3742, metalness: .5, roughness: .45 }),
+  wall: mat({ color: 0xE3E6EA, metalness: .15, roughness: .55 }),
+  roof: mat({ color: 0x3E4550, metalness: .35, roughness: .5 }),
+  trim: mat({ color: 0x2B5BA8, metalness: .3, roughness: .45 }),
+  glass: mat({ color: 0x1D2A38, metalness: .5, roughness: .08 }),
+  stake: mat({ color: 0xF07A3E, roughness: .7 }),
+  string: mat({ color: 0xFFFFFF, roughness: .6 }),
+  trunk: mat({ color: 0x5A4632, roughness: 1 }),
+  leaf: mat({ color: 0x46612F, roughness: 1, flatShading: true }),
+  lamp: mat({ color: 0x3A3F47, metalness: .5, roughness: .5 }),
+  mount: mat({ color: 0x8C99A8, roughness: 1, flatShading: true }),
+};
+function doorTex() {
+  const c = document.createElement('canvas'); c.width = 256; c.height = 280; const g = c.getContext('2d');
+  g.fillStyle = '#CBD0D6'; g.fillRect(0, 0, 256, 280);
+  for (let i = 1; i < 6; i++) { g.fillStyle = '#9BA3AD'; g.fillRect(0, i * 280 / 6 - 2, 256, 4); }
+  g.fillStyle = '#AEB6BF'; for (let i = 0; i < 6; i++) g.fillRect(0, i * 280 / 6 + 22, 256, 1);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+M.door = mat({ map: doorTex(), metalness: .3, roughness: .45 });
+function logoTex() {
+  const c = document.createElement('canvas'); c.width = 1024; c.height = 176; const g = c.getContext('2d');
+  g.fillStyle = '#2B5BA8'; g.fillRect(0, 0, 1024, 176);
+  g.fillStyle = '#FFFFFF'; g.font = '800 92px Manrope, Arial'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText('ВАШ ЛОГОТИП', 512, 92);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+
+/* ---------- helpers ---------- */
+const boxG = new THREE.BoxGeometry(1, 1, 1);
+function box(sx, sy, sz, m, x, y, z, parent) {
+  const o = new THREE.Mesh(boxG, m); o.scale.set(sx, sy, sz); o.position.set(x, y, z);
+  o.castShadow = true; o.receiveShadow = true; parent.add(o); return o;
+}
+// I-beam as group, long axis = local X, depth = local Y
+function ibeam(len, depth, flange, m) {
+  const g = new THREE.Group();
+  box(len, depth, 0.022, m, 0, 0, 0, g);
+  box(len, 0.03, flange, m, 0, depth / 2, 0, g);
+  box(len, 0.03, flange, m, 0, -depth / 2, 0, g);
+  return g;
+}
+function rod(a, b, r, m, parent) {
+  const d = new THREE.Vector3().subVectors(b, a); const len = d.length();
+  const o = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 6), m);
+  o.position.copy(a).addScaledVector(d, .5);
+  o.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
+  o.castShadow = true; parent.add(o); return o;
+}
+function add(stage, obj) { obj.userData.anim = true; stage.add(obj); return obj; }
+
+/* ---------- static environment ---------- */
+const env = new THREE.Group(); scene.add(env);
+{
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(2400, 2400), M.grass);
+  ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; env.add(ground);
+  // mountains
+  const mg = new THREE.PlaneGeometry(2600, 300, 120, 12); mg.rotateX(-Math.PI / 2);
+  const p = mg.attributes.position;
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i), z = p.getZ(i); const e = Math.max(0, (150 - z) / 300);
+    const h = .5 + .22 * Math.sin(x * .011) + .15 * Math.sin(x * .027 + 1.3) + .13 * Math.sin(x * .063 + .4);
+    p.setY(i, h * 190 * e * e);
+  }
+  mg.computeVertexNormals();
+  const m = new THREE.Mesh(mg, M.mount); m.position.set(0, -2, 820); env.add(m);
+}
+
+/* ---------- building by stages ---------- */
+const STAGES = [
+  { t: 'Участок и разметка', p: 'Геодезист выносит оси здания на местность, площадку выравнивают и отсыпают щебнем. Колышками отмечены места будущих колонн', d: '2–3 дня', m: 'щебень, геодезия' },
+  { t: 'Фундамент', p: 'Под каждую колонну заливается столбчатый фундамент с анкерами, по периметру ростверк, внутри бетонный пол', d: '2–3 недели', m: 'бетон М300, арматура, анкерные болты' },
+  { t: 'Колонны', p: 'Стальные колонны из двутавра ставятся на анкеры с шагом 6 м и выравниваются по уровню', d: '3–5 дней', m: 'двутавр, болтовые соединения' },
+  { t: 'Ригели', p: 'На колонны монтируются ригели двускатной кровли. Колонна и ригель вместе образуют раму, которая держит всё здание', d: '4–6 дней', m: 'двутавр, фланцевые узлы' },
+  { t: 'Прогоны и связи', p: 'Прогоны кровли и ригели стен связывают рамы между собой, крестовые связи в крайних пролётах дают жёсткость от ветра', d: '5–7 дней', m: 'профиль, связи из круглой стали' },
+  { t: 'Стеновые сэндвич-панели', p: 'Стены закрываются сэндвич-панелями: два листа стали с утеплителем внутри. Монтаж идёт снизу вверх', d: '1–2 недели', m: 'сэндвич 100 мм, минвата' },
+  { t: 'Кровля', p: 'Кровельные сэндвич-панели укладываются по прогонам от карниза к коньку, сверху конёк и водостоки', d: '1 неделя', m: 'кровельный сэндвич 120 мм' },
+  { t: 'Ворота, окна, отделка', p: 'Секционные ворота, двери, ленточное остекление, нащельники и фасадная вывеска с логотипом заказчика', d: '5–7 дней', m: 'секционные ворота, ПВХ, фасонка' },
+  { t: 'Благоустройство и сдача', p: 'Асфальт перед воротами, отмостка, освещение и озеленение. Объект сдаётся заказчику с актом и гарантией', d: '1 неделя', m: 'асфальт, бордюр, освещение' },
+];
+
+const P = { W: 24, L: 48, H: 8 };
+const pitch = THREE.MathUtils.degToRad(10);
+let stageGroups = [];
+const building = new THREE.Group(); scene.add(building);
+let xray = false;
+
+function build() {
+  building.clear(); stageGroups = [];
+  const { W, L, H } = P; const bay = 6; const nb = Math.round(L / bay);
+  const ridge = H + (W / 2) * Math.tan(pitch);
+  const fl = 0.3;               // floor level
+  const S = STAGES.map(() => { const g = new THREE.Group(); building.add(g); stageGroups.push(g); return g; });
+  const colX = [-W / 2 + 0.2, W / 2 - 0.2];
+  const zs = []; for (let i = 0; i <= nb; i++) zs.push(-L / 2 + i * bay);
+
+  // 1 site
+  add(S[0], box(W + 8, 0.12, L + 8, M.gravel, 0, 0.06, 0, new THREE.Group()).parent);
+  S[0].children[0].children[0].castShadow = false;
+  for (const z of zs) for (const x of colX) add(S[0], box(0.12, 0.9, 0.12, M.stake, x, 0.55, z, new THREE.Group()).parent);
+  for (const x of colX) add(S[0], box(0.03, 0.03, L, M.string, x, 0.85, 0, new THREE.Group()).parent);
+  for (const z of [-L / 2, L / 2]) add(S[0], box(W - 0.4, 0.03, 0.03, M.string, 0, 0.85, z, new THREE.Group()).parent);
+
+  // 2 foundation
+  for (const z of zs) for (const x of colX) add(S[1], box(1.4, 0.5, 1.4, M.concrete, x, 0.25, z, new THREE.Group()).parent);
+  // gable footing for wind posts
+  for (const z of [-L / 2, L / 2]) for (const x of [-W / 4, 0, W / 4]) add(S[1], box(1.0, 0.45, 1.0, M.concrete, x, 0.22, z, new THREE.Group()).parent);
+  { const g = new THREE.Group(); // grade beam ring
+    box(0.4, 0.5, L + 0.4, M.concrete, -W / 2, 0.25, 0, g); box(0.4, 0.5, L + 0.4, M.concrete, W / 2, 0.25, 0, g);
+    box(W, 0.5, 0.4, M.concrete, 0, 0.25, -L / 2, g); box(W, 0.5, 0.4, M.concrete, 0, 0.25, L / 2, g); add(S[1], g); }
+  add(S[1], box(W - 0.4, 0.18, L - 0.4, M.concrete, 0, fl - 0.09 + 0.02, 0, new THREE.Group()).parent);
+
+  // 3 columns
+  const colH = H - fl;
+  for (const z of zs) for (const x of colX) {
+    const c = ibeam(colH, 0.4, 0.22, M.steel); c.rotation.z = Math.PI / 2; c.position.set(x, fl + colH / 2, z);
+    const g = new THREE.Group(); g.add(c); box(0.6, 0.03, 0.5, M.steel, x, fl + 0.015, z, g); add(S[2], g);
+  }
+
+  // 4 rafters (+ gable wind posts)
+  const rl = (W / 2) / Math.cos(pitch);
+  for (const z of zs) {
+    const g = new THREE.Group();
+    for (const s of [-1, 1]) {
+      const r = ibeam(rl + 0.2, 0.5, 0.22, M.steel); r.rotation.z = -s * pitch;
+      r.position.set(s * W / 4, (H + ridge) / 2 + 0.05, z); g.add(r);
+    }
+    add(S[3], g);
+  }
+  for (const z of [-L / 2, L / 2]) for (const x of [-W / 4, 0, W / 4]) {
+    const h = H + (W / 2 - Math.abs(x)) * Math.tan(pitch) - fl - 0.3;
+    const c = ibeam(h, 0.3, 0.16, M.steel); c.rotation.z = Math.PI / 2; c.position.set(x, fl + h / 2, z);
+    const g = new THREE.Group(); g.add(c); add(S[3], g);
+  }
+
+  // 5 purlins, girts, bracing
+  for (const s of [-1, 1]) for (let d = 0.4; d <= rl - 0.2; d += 1.5) {
+    const x = s * (W / 2 - d * Math.cos(pitch)); const y = H + d * Math.sin(pitch) + 0.37;
+    const o = box(0.08, 0.2, L + 0.3, M.steel2, x, y, 0, new THREE.Group()); o.rotation.z = -s * pitch; add(S[4], o.parent);
+  }
+  for (const x of [-W / 2, W / 2]) for (let y = fl + 1.4; y < H - 0.4; y += 1.6)
+    add(S[4], box(0.08, 0.18, L + 0.2, M.steel2, x, y, 0, new THREE.Group()).parent);
+  for (const z of [-L / 2, L / 2]) for (let y = fl + 1.4; y < H - 0.4; y += 1.6)
+    add(S[4], box(W, 0.18, 0.08, M.steel2, 0, y, z, new THREE.Group()).parent);
+  for (const [z0, z1] of [[-L / 2, -L / 2 + bay], [L / 2 - bay, L / 2]]) {
+    for (const x of [-W / 2 + 0.05, W / 2 - 0.05]) {
+      const g = new THREE.Group();
+      rod(new THREE.Vector3(x, fl + 0.3, z0), new THREE.Vector3(x, H - 0.3, z1), 0.035, M.brace, g);
+      rod(new THREE.Vector3(x, fl + 0.3, z1), new THREE.Vector3(x, H - 0.3, z0), 0.035, M.brace, g);
+      add(S[4], g);
+    }
+    for (const s of [-1, 1]) {
+      const g = new THREE.Group(); const yE = H + 0.32, yR = ridge + 0.3;
+      rod(new THREE.Vector3(s * (W / 2 - 0.3), yE, z0), new THREE.Vector3(0, yR, z1), 0.03, M.brace, g);
+      rod(new THREE.Vector3(s * (W / 2 - 0.3), yE, z1), new THREE.Vector3(0, yR, z0), 0.03, M.brace, g);
+      add(S[4], g);
+    }
+  }
+
+  // 6 wall panels
+  const pt = 0.1, off = 0.16;
+  for (let y = fl + 0.2; y < H; y += 1.0) {
+    const h = Math.min(0.98, H - y);
+    for (const s of [-1, 1]) {
+      const o = box(pt, h, L + 0.3, M.wall, s * (W / 2 + off), y + h / 2, 0, new THREE.Group()); o.userData.wall = true; add(S[5], o.parent);
+    }
+    for (const s of [-1, 1]) {
+      const o = box(W + 0.42, h, pt, M.wall, 0, y + h / 2, s * (L / 2 + off), new THREE.Group()); o.userData.wall = true; add(S[5], o.parent);
+    }
+  }
+  // gable triangles as stacked strips
+  for (let y = H; y < ridge; y += 1.0) {
+    const y1 = Math.min(ridge, y + 0.98);
+    const w0 = W + 0.42 - 2 * (y - H) / Math.tan(pitch), w1 = Math.max(0.05, W + 0.42 - 2 * (y1 - H) / Math.tan(pitch));
+    const sh = new THREE.Shape(); sh.moveTo(-w0 / 2, 0); sh.lineTo(w0 / 2, 0); sh.lineTo(w1 / 2, y1 - y); sh.lineTo(-w1 / 2, y1 - y); sh.closePath();
+    const geo = new THREE.ExtrudeGeometry(sh, { depth: pt, bevelEnabled: false });
+    for (const s of [-1, 1]) {
+      const o = new THREE.Mesh(geo, M.wall); o.position.set(0, y, s * (L / 2 + off) - pt / 2); o.castShadow = o.receiveShadow = true; o.userData.wall = true;
+      const g = new THREE.Group(); g.add(o); add(S[5], g);
+    }
+  }
+
+  // 7 roof
+  const ov = 0.5, sl = rl + ov, rt = 0.12;
+  for (let z = -L / 2 - 0.3; z < L / 2 + 0.3 - 0.01; z += 1.0) {
+    for (const s of [-1, 1]) {
+      const o = box(sl, rt, 0.97, M.roof, 0, 0, 0, new THREE.Group());
+      const cx = s * (W / 2 + ov * Math.cos(pitch) - (sl / 2) * Math.cos(pitch));
+      const cy = H + 0.5 - ov * Math.sin(pitch) + (sl / 2) * Math.sin(pitch) + 0.02;
+      o.position.set(cx, cy, z + 0.5); o.rotation.z = -s * pitch; o.userData.roof = true; add(S[6], o.parent);
+    }
+  }
+  add(S[6], box(0.7, 0.12, L + 0.6, M.roof, 0, ridge + 0.56, 0, new THREE.Group()).parent);
+  for (const s of [-1, 1]) add(S[6], box(0.22, 0.2, L + 0.6, M.trim, s * (W / 2 + ov * Math.cos(pitch) + 0.05), H + 0.38, 0, new THREE.Group()).parent);
+
+  // 8 doors, windows, trims, logo
+  const fz = -L / 2 - off - pt / 2 - 0.05;
+  const doorW = Math.min(5, W / 4.2), doorH = Math.min(5.5, H - 1.6);
+  for (const x of [-W / 4, W / 4]) {
+    const g = new THREE.Group();
+    box(doorW, doorH, 0.1, M.door, x, fl + doorH / 2, fz, g);
+    box(doorW + 0.4, 0.2, 0.12, M.trim, x, fl + doorH + 0.1, fz - 0.01, g);
+    box(0.2, doorH + 0.2, 0.12, M.trim, x - doorW / 2 - 0.1, fl + doorH / 2 + 0.1, fz - 0.01, g);
+    box(0.2, doorH + 0.2, 0.12, M.trim, x + doorW / 2 + 0.1, fl + doorH / 2 + 0.1, fz - 0.01, g);
+    add(S[7], g);
+  }
+  { const g = new THREE.Group(); box(1.0, 2.1, 0.1, M.trim, 0, fl + 1.05, fz, g); box(1.8, 0.08, 1.1, M.roof, 0, fl + 2.5, fz - 0.55, g); add(S[7], g); }
+  for (const s of [-1, 1]) for (let i = 0; i < nb; i++) {
+    add(S[7], box(0.08, 0.9, bay - 1.8, M.glass, s * (W / 2 + off + 0.06), H - 2.0, -L / 2 + bay / 2 + i * bay, new THREE.Group()).parent);
+  }
+  for (const sx of [-1, 1]) for (const sz of [-1, 1])
+    add(S[7], box(0.28, H - fl, 0.28, M.trim, sx * (W / 2 + off), fl + (H - fl) / 2, sz * (L / 2 + off), new THREE.Group()).parent);
+  for (const s of [-1, 1]) add(S[7], box(0.14, 0.6, L + 0.5, M.trim, s * (W / 2 + off + 0.04), H - 0.3, 0, new THREE.Group()).parent);
+  { const lw = Math.min(9, W * 0.38); const lm = new THREE.MeshStandardMaterial({ map: logoTex(), roughness: .5 });
+    const g = new THREE.Group(); const o = new THREE.Mesh(new THREE.PlaneGeometry(lw, lw * 176 / 1024), lm);
+    o.position.set(0, Math.min(H + 0.7, ridge - 1.2), fz - 0.02); o.rotation.y = Math.PI; g.add(o); add(S[7], g); }
+
+  // 9 site works
+  add(S[8], box(W + 12, 0.06, 22, M.asphalt, 0, 0.13, -L / 2 - 11.5, new THREE.Group()).parent);
+  { const g = new THREE.Group(); box(W + 1.6, 0.1, L + 1.6, M.concrete, 0, 0.14, 0, g); add(S[8], g); }
+  for (const s of [-1, 1]) add(S[8], box(0.2, 0.25, 22, M.concrete, s * (W / 2 + 6), 0.2, -L / 2 - 11.5, new THREE.Group()).parent);
+  const rnd = mulberry(7);
+  const tree = (x, z, k) => { const g = new THREE.Group();
+    const tr = new THREE.Mesh(new THREE.CylinderGeometry(.16 * k, .22 * k, 3 * k, 7), M.trunk); tr.position.set(x, 1.5 * k, z); tr.castShadow = true; g.add(tr);
+    const lf = new THREE.Mesh(new THREE.IcosahedronGeometry(2.1 * k, 1), M.leaf); lf.position.set(x, 4.1 * k, z); lf.scale.y = 1.2; lf.castShadow = true; g.add(lf);
+    add(S[8], g); };
+  for (let i = 0; i < Math.ceil(L / 8); i++) tree(-W / 2 - 7 - rnd() * 3, -L / 2 + 4 + i * 8 + rnd() * 2, .9 + rnd() * .35);
+  for (let i = 0; i < Math.ceil(L / 10); i++) tree(W / 2 + 8 + rnd() * 3, -L / 2 + 6 + i * 10 + rnd() * 2, .9 + rnd() * .35);
+  for (const s of [-1, 1]) { const g = new THREE.Group(); const x = s * (W / 2 + 5.5), z = -L / 2 - 6;
+    box(0.14, 6, 0.14, M.lamp, x, 3, z, g); box(0.9, 0.12, 0.3, M.lamp, x - s * 0.4, 6, z, g); add(S[8], g); }
+
+  // cache animation bases
+  for (const g of stageGroups) g.children.forEach((c, i) => { c.userData.base = c.position.clone(); c.userData.i = i; });
+  applyXray();
+}
+function mulberry(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+/* ---------- x-ray ---------- */
+function applyXray() {
+  for (const m of [M.wall, M.roof]) { m.transparent = xray; m.opacity = xray ? 0.16 : 1; m.depthWrite = !xray; m.needsUpdate = true; }
+  building.traverse(o => { if (o.isMesh && (o.userData.wall || o.userData.roof)) o.castShadow = !xray; });
+}
+
+/* ---------- stage state & animation ---------- */
+let cur = 0; const anims = []; // {obj, t0, dur}
+function setStage(n, animate = true) {
+  n = Math.max(0, Math.min(STAGES.length - 1, n));
+  const now = performance.now();
+  stageGroups.forEach((g, i) => {
+    const show = i <= n; const was = g.visible && g.userData.shown;
+    g.visible = show; g.userData.shown = show;
+    if (show && (!was) && animate) {
+      const k = g.children.length; const span = Math.min(1700, 60 * k);
+      g.children.forEach((c, j) => {
+        const delay = (i < n ? 0 : 1) * (k > 1 ? (j / (k - 1)) * span : 0);
+        c.position.copy(c.userData.base).y += 6; c.scale.setScalar(0.001);
+        anims.push({ obj: c, t0: now + delay + (i < n ? 0 : 0), dur: 520 });
+      });
+    } else if (show) {
+      g.children.forEach(c => { c.position.copy(c.userData.base); c.scale.setScalar(1); });
+    }
+  });
+  cur = n; renderUI();
+}
+const easeOut = t => 1 - Math.pow(1 - t, 3);
+function tickAnims(now) {
+  for (let i = anims.length - 1; i >= 0; i--) {
+    const a = anims[i]; const t = (now - a.t0) / a.dur;
+    if (t < 0) continue;
+    const e = easeOut(Math.min(1, t));
+    a.obj.position.copy(a.obj.userData.base); a.obj.position.y += 6 * (1 - e);
+    a.obj.scale.setScalar(Math.max(0.001, e));
+    if (t >= 1) anims.splice(i, 1);
+  }
+}
+
+/* ---------- UI ---------- */
+const $ = id => document.getElementById(id);
+const stepsEl = $('steps');
+STAGES.forEach((s, i) => {
+  const b = document.createElement('button'); b.className = 'step';
+  b.innerHTML = `<span class="n">${String(i + 1).padStart(2, '0')}</span><span>${s.t}</span><span class="track"><i></i></span>`;
+  b.onclick = () => { stopPlay(); setStage(i); };
+  stepsEl.appendChild(b);
+});
+function renderUI() {
+  const s = STAGES[cur];
+  $('cK').textContent = `Этап ${cur + 1} из ${STAGES.length}`;
+  $('cT').textContent = s.t; $('cP').textContent = s.p; $('cD').textContent = s.d; $('cM').textContent = s.m;
+  [...stepsEl.children].forEach((b, i) => { b.classList.toggle('done', i < cur); b.classList.toggle('cur', i === cur); });
+  const el = stepsEl.children[cur]; stepsEl.scrollTo({ left: el.offsetLeft - stepsEl.clientWidth / 2 + el.clientWidth / 2, behavior: 'smooth' });
+  $('prev').disabled = cur === 0; $('next').disabled = cur === STAGES.length - 1;
+}
+$('prev').onclick = () => { stopPlay(); setStage(cur - 1); };
+$('next').onclick = () => { stopPlay(); setStage(cur + 1); };
+let playT = null;
+function stopPlay() { clearInterval(playT); playT = null; $('play').classList.remove('on'); $('play').textContent = '▶ Авто'; }
+$('play').onclick = () => {
+  if (playT) return stopPlay();
+  $('play').classList.add('on'); $('play').textContent = '❚❚ Пауза';
+  if (cur === STAGES.length - 1) setStage(0);
+  playT = setInterval(() => { if (cur >= STAGES.length - 1) return stopPlay(); setStage(cur + 1); }, 3200);
+};
+$('xray').onclick = () => { xray = !xray; $('xray').classList.toggle('on', xray); $('xray').textContent = xray ? 'Скрыть каркас' : 'Показать каркас'; applyXray(); };
+
+function fmt(n) { return n.toLocaleString('ru-RU'); }
+function updateTitle() {
+  $('title').textContent = `Склад ${P.W} × ${P.L} м`;
+  $('subtitle').textContent = `${fmt(P.W * P.L)} м² · высота ${P.H} м · металлокаркас`;
+}
+for (const id of ['pW', 'pL', 'pH']) $(id).onchange = () => {
+  P.W = +$('pW').value; P.L = +$('pL').value; P.H = +$('pH').value;
+  updateTitle(); anims.length = 0; build();
+  stageGroups.forEach(g => g.userData.shown = false);
+  setStage(cur, true); frameView(currentView, false);
+};
+
+/* ---------- views ---------- */
+let currentView = 'iso'; let camAnim = null;
+function viewPose(v) {
+  const { W, L, H } = P; const R = Math.max(W, L) * Math.max(1, Math.pow(1.2 / camera.aspect, 1.0));
+  switch (v) {
+    case 'front': return { p: [0, H * 0.7, -L / 2 - R * 1.05], t: [0, H * 0.5, 0] };
+    case 'top': return { p: [0.01, R * 1.9, -0.01 - R * 0.15], t: [0, 0, 0] };
+    case 'inside': return { p: [W * 0.2, 1.7, -L / 2 + 4], t: [-W * 0.05, H * 0.55, L * 0.1] };
+    default: return { p: [-R * 0.95, R * 0.55, -R * 1.05], t: [0, H * 0.35, 0] };
+  }
+}
+function frameView(v, smooth = true) {
+  currentView = v; const pose = viewPose(v);
+  const to = { p: new THREE.Vector3(...pose.p), t: new THREE.Vector3(...pose.t) };
+  if (!smooth) { camera.position.copy(to.p); controls.target.copy(to.t); controls.update(); return; }
+  camAnim = { from: { p: camera.position.clone(), t: controls.target.clone() }, to, t0: performance.now(), dur: 900 };
+  document.querySelectorAll('#views .btn').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+}
+document.querySelectorAll('#views .btn').forEach(b => b.onclick = () => frameView(b.dataset.v));
+
+/* ---------- loop ---------- */
+function layout() { document.documentElement.style.setProperty('--headH', (document.getElementById('head').offsetHeight + 26) + 'px'); }
+addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); layout(); });
+layout();
+let hintHidden = false;
+controls.addEventListener('start', () => { camAnim = null; if (!hintHidden) { hintHidden = true; $('hint').style.opacity = 0; } });
+function loop(now) {
+  if (camAnim) {
+    const t = Math.min(1, (now - camAnim.t0) / camAnim.dur), e = 1 - Math.pow(1 - t, 3);
+    camera.position.lerpVectors(camAnim.from.p, camAnim.to.p, e); controls.target.lerpVectors(camAnim.from.t, camAnim.to.t, e);
+    if (t >= 1) camAnim = null;
+  }
+  tickAnims(now); controls.update(); renderer.render(scene, camera); requestAnimationFrame(loop);
+}
+build(); updateTitle(); frameView('iso', false);
+stageGroups.forEach(g => { g.visible = false; g.userData.shown = false; });
+setStage(0);
+requestAnimationFrame(loop);
+window.__angar = { setStage, P, frameView };
+</script>
+</body>
+</html>
