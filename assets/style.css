@@ -572,3 +572,113 @@ a.client:hover .client__arr{opacity:1;transform:none;color:var(--accent-2)}
 .g--row figcaption{padding-top:8px}
 .g--row figcaption b{font-weight:500;color:var(--fg-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 @media (max-width:760px){.set-row{flex-wrap:wrap}.g--row{flex:1 1 calc(50% - 7px)!important}}
+
+
+/* ---------- УДОБСТВО: меню, услуги в шапке, быстрые контакты ---------- */
+.nav__dd{position:relative;display:flex;align-items:center;align-self:stretch}
+.nav__dd>a{display:inline-flex;align-items:center;gap:6px}
+.nav__caret{width:8px;height:5px;opacity:.6;transition:transform .2s}
+.nav__dd:hover .nav__caret,.nav__dd:focus-within .nav__caret{transform:rotate(180deg)}
+.nav__drop{position:absolute;left:-6px;top:100%;min-width:270px;padding:8px;display:grid;background:var(--bg-2);border:1px solid var(--line-2);
+  box-shadow:0 24px 50px rgba(0,0,0,.5);opacity:0;visibility:hidden;transform:translateY(-6px);transition:opacity .2s,transform .2s,visibility .2s}
+.nav__dd:hover .nav__drop,.nav__dd:focus-within .nav__drop{opacity:1;visibility:visible;transform:none}
+.nav__links .nav__drop a{display:flex;align-items:center;gap:12px;padding:11px 12px;color:var(--fg-2)}
+.nav__links .nav__drop a:hover,.nav__links .nav__drop a:focus-visible{background:rgba(242,241,238,.06);color:var(--fg)}
+.nav__links .nav__drop a[aria-current]{color:var(--accent-2)}
+.nav__drop b{color:var(--fg-3);font-weight:500;min-width:18px}
+.nav__wa{display:none;align-items:center;gap:8px;padding:0 16px;border-left:1px solid var(--line);color:var(--fg)}
+.nav__wa svg,.btn--wa svg,.dock__wa svg{width:16px;height:16px;flex:none}
+.btn--wa,.hero__btns .btn.btn--wa{background:#1faa59;border-color:#1faa59;color:#fff}
+.btn--wa:hover,.hero__btns .btn.btn--wa:hover{background:#178f49;border-color:#178f49}
+.btn--wa:hover svg{transform:none}
+.nav__burger span{transition:transform .3s}
+.nav__burger.is-open span:first-child{transform:translateY(2.75px) rotate(45deg)}
+.nav__burger.is-open span:last-child{transform:translateY(-2.75px) rotate(-45deg)}
+html.menu-lock,html.menu-lock body{overflow:hidden}
+
+.menu{overflow-y:auto;overscroll-behavior:contain;padding-top:8px;padding-bottom:calc(28px + env(safe-area-inset-bottom))}
+.menu .menu__main a{font-size:clamp(30px,9vw,40px);padding:12px 0;display:flex;justify-content:space-between;align-items:center}
+.menu .menu__main a::after{content:"→";font-family:var(--body);font-size:18px;font-weight:400;color:var(--fg-3)}
+.menu__label{color:var(--fg-3);margin:26px 0 6px}
+.menu__svc{display:grid;grid-template-columns:1fr 1fr;column-gap:16px}
+.menu .menu__svc a{font:500 15px/1.25 var(--body);text-transform:none;padding:13px 0;display:flex;gap:10px;align-items:baseline;color:var(--fg-2)}
+.menu .menu__svc a[aria-current]{color:var(--accent-2)}
+.menu__svc b{color:var(--fg-3);font-size:10px}
+.menu__contact{display:grid;gap:10px;margin-top:26px}
+.menu .menu__contact a{font-family:var(--mono);font-size:12px;font-weight:500;line-height:1;padding:0 20px;border-bottom:1px solid var(--line-2);justify-content:center}
+.menu .menu__contact .btn--wa{border-color:#1faa59}
+.menu .menu__contact .menu__tel{border:0;padding:14px 0 0;text-align:center;color:var(--fg-2)}
+
+.dock{display:none}
+@media (max-width:1100px){
+  .nav__burger{display:block}
+  .nav__item{display:none}
+}
+@media (max-width:760px){
+  .nav__wa{display:flex}
+  .lead-pill{display:none!important}
+  .contacts{flex-direction:column;align-items:stretch;gap:8px;padding:0 4px}
+  .contacts .btn{justify-content:center;height:52px;padding:0 12px}
+  .dock{position:fixed;left:0;right:0;bottom:0;z-index:48;display:grid;grid-template-columns:1fr 1fr 52px;height:calc(52px + env(safe-area-inset-bottom));
+    padding-bottom:env(safe-area-inset-bottom);background:rgba(18,19,22,.96);border-top:1px solid var(--line-2);
+    transform:translateY(100%);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+  .dock.is-on{transform:none}
+  html.lead-lock .dock,html.menu-lock .dock{transform:translateY(100%)}
+  .dock>*{display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border:0;background:none;color:var(--fg);cursor:pointer}
+  .dock>*+*{border-left:1px solid var(--line-2)}
+  .dock__wa{background:#1faa59!important;color:#fff!important}
+  .dock__top svg{width:16px;height:16px}
+  .foot{padding-bottom:calc(26px + 52px + env(safe-area-inset-bottom))}
+  .foot>a[href="#top"]{display:none}
+}
+@media (prefers-reduced-motion:reduce){.dock,.nav__drop,.nav__burger span{transition:none}}
+
+
+/* ---------- ШОУРИЛ ---------- */
+.reel__box{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,1fr);border:1px solid var(--line-2);background:var(--bg-2)}
+.reel__stage{position:relative;aspect-ratio:16/10;overflow:hidden;background:#0c0d0f}
+.reel__bg{position:absolute;inset:-40px;background-size:cover;background-position:center;filter:blur(36px) brightness(.5);transition:background-image .5s}
+.reel__media>*{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transform:scale(1.03);transition:opacity .6s,transform 1.2s cubic-bezier(.2,.7,.2,1)}
+.reel__media>.is-in{opacity:1;transform:none}
+.reel__cap{position:absolute;left:0;right:0;bottom:0;padding:70px 26px 24px;display:grid;grid-template-columns:1fr auto;column-gap:24px;align-items:end;
+  background:linear-gradient(180deg,rgba(12,13,15,0),rgba(12,13,15,.92) 62%)}
+.reel__n{grid-column:1/-1;color:var(--accent-2);margin-bottom:10px}
+.reel__title{font-family:var(--display);font-weight:900;text-transform:uppercase;font-size:clamp(22px,2.6vw,38px);line-height:1}
+.reel__desc{grid-column:1;color:var(--fg-2);font-size:15px;line-height:1.45;margin-top:10px;max-width:520px}
+.reel__link{grid-column:2;grid-row:2/4;align-self:end;white-space:nowrap}
+.reel__list{display:flex;flex-direction:column;border-left:1px solid var(--line-2)}
+.reel__item{position:relative;flex:1;display:flex;align-items:center;gap:16px;padding:14px 22px;background:none;border:0;border-bottom:1px solid var(--line);
+  color:var(--fg-2);text-align:left;cursor:pointer;transition:color .25s,background .25s}
+.reel__item:last-child{border-bottom:0}
+.reel__item:hover{color:var(--fg);background:rgba(242,241,238,.03)}
+.reel__item.is-on{color:var(--fg);background:rgba(45,129,255,.10)}
+.reel__item b{color:var(--fg-3);min-width:20px}
+.reel__item.is-on b{color:var(--accent-2)}
+.reel__item strong{display:block;font:600 17px/1.2 var(--body)}
+.reel__item em{display:block;font-style:normal;font-size:13px;line-height:1.4;color:var(--fg-3);margin-top:4px}
+.reel__item i{position:absolute;left:0;bottom:-1px;height:2px;width:100%;background:var(--accent);transform:scaleX(0);transform-origin:left}
+.reel__box.is-run .reel__item.is-on i{animation:reelbar var(--reel-dur,6000ms) linear forwards}
+.reel__item.is-on i{transform:scaleX(1)}
+.reel__box.is-run .reel__item.is-on i{transform:scaleX(0)}
+@keyframes reelbar{to{transform:scaleX(1)}}
+.reel__item:focus-visible{outline:2px solid var(--accent-2);outline-offset:-2px}
+@media (max-width:1100px){
+  .reel__box{grid-template-columns:1fr}
+  .reel__list{border-left:0;border-top:1px solid var(--line-2);display:grid;grid-template-columns:1fr 1fr}
+  .reel__item:nth-child(odd){border-right:1px solid var(--line)}
+  .reel__item:nth-last-child(-n+2){border-bottom:0}
+}
+@media (max-width:760px){
+  .reel__box{display:flex;flex-direction:column-reverse;margin:0 calc(var(--pad) * -1);border-left:0;border-right:0}
+  .reel__stage{aspect-ratio:auto}
+  .reel__media{position:relative;aspect-ratio:1/1}
+  .reel__cap{position:relative;grid-template-columns:1fr;padding:18px 16px 20px;background:rgba(12,13,15,.72)}
+  .reel__desc{font-size:14px}
+  .reel__link{grid-column:1;grid-row:auto;margin-top:16px;justify-content:center}
+  .reel__list{display:flex;flex-direction:row;overflow-x:auto;scrollbar-width:none;border-top:0;border-bottom:1px solid var(--line-2);scroll-snap-type:x proximity;position:relative}
+  .reel__list::-webkit-scrollbar{display:none}
+  .reel__item{flex:none;padding:0 16px;height:52px;gap:8px;border-bottom:0;border-right:1px solid var(--line)!important;scroll-snap-align:start}
+  .reel__item strong{font-size:14px;white-space:nowrap}
+  .reel__item em{display:none}
+}
+@media (prefers-reduced-motion:reduce){.reel__media>*{transition:none}}

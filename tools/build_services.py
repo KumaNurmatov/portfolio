@@ -473,7 +473,7 @@ def page(s, nxt):
   <div class="hero__glow"></div>
   <div class="wrap">
     <div class="mono rv" style="color:var(--fg-3);margin-bottom:28px;position:relative">Бишкек · офис или гибрид · командировки</div>
-    <h2 class="cta__big rv">Нужна<br><em>{s["title"].lower()}?</em></h2>
+    <h2 class="cta__big rv">Обсудим<br><em>{s["title"].lower()}?</em></h2>
     <p class="rv">Расскажите о задаче — предложу идею, сроки и стоимость.</p>
     <div class="hero__btns rv">
       <a href="{PHONE_HREF}" class="btn btn--solid">{PHONE} {ARROW}</a>

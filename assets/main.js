@@ -1,4 +1,5 @@
 // Общий скрипт для главной и страниц услуг
+const SITE_ROOT = new URL('..', document.currentScript.src).href;
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ---------- Плавный скролл (Lenis, как у ArtCraft) ----------
@@ -329,12 +330,101 @@ if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
   }
 }
 
-// ---------- Мобильное меню ----------
-const burger = document.querySelector('.nav__burger'), menu = document.getElementById('menu');
-if (burger && menu) {
-  burger.addEventListener('click', () => { const o = menu.classList.toggle('is-open'); burger.setAttribute('aria-expanded', o); });
-  menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { menu.classList.remove('is-open'); burger.setAttribute('aria-expanded', false); }));
-}
+// ---------- Навигация: меню, выпадающий список услуг, быстрые контакты ----------
+(() => {
+  const WA = '996709906852', TEL = '+996709906852';
+  const isHome = !!document.getElementById('tunnel');
+  const sec = id => isHome ? '#' + id : SITE_ROOT + 'index.html#' + id;
+  const SVC = [['identity', 'Айдентика'], ['motion', 'Моушн-графика'], ['ai', 'ИИ-видео и визуалы'], ['ads', 'Креативы для таргета'],
+    ['smm', 'Контент для соцсетей'], ['print', 'Полиграфия и наружка'], ['photo-video', 'Съёмка и монтаж'], ['web', 'Сайты и веб-сервисы']];
+  const curSvc = document.body.dataset.service || '';
+  const topic = document.querySelector('.s-title')?.textContent.trim();
+  const waText = 'Здравствуйте, Курманбек! Пишу с вашего сайта' + (topic ? ', интересует: ' + topic : '');
+  const waHref = `https://wa.me/${WA}?text=${encodeURIComponent(waText)}`;
+  const waIcon = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 1.8a8.2 8.2 0 1 1-4.2 15.2l-.3-.2-2.9.8.8-2.8-.2-.3A8.2 8.2 0 0 1 12 3.8zM8.5 7.3c-.2 0-.5 0-.7.3-.3.3-1 .9-1 2.3s1 2.7 1.1 2.9c.2.2 2 3.200 5 4.400 2.400.9 2.900.8 3.400.7.500-.1 1.700-.7 1.900-1.300.2-.700.2-1.200.2-1.300-.1-.2-.3-.2-.6-.4l-1.900-.9c-.3-.1-.5-.2-.7.1l-.9 1.100c-.2.2-.3.2-.6.1-.3-.2-1.200-.5-2.300-1.400-.9-.800-1.400-1.700-1.600-2-.2-.3 0-.5.1-.6l.4-.5c.2-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2.100c-.2-.500-.4-.4-.6-.4z"/></svg>';
+  const go = hash => {
+    const el = hash === '#top' ? 0 : document.querySelector(hash);
+    if (el === null) return false;
+    lenis ? lenis.scrollTo(el, { offset: -56 }) : (el === 0 ? scrollTo({ top: 0, behavior: 'smooth' }) : el.scrollIntoView({ behavior: 'smooth' }));
+    return true;
+  };
+
+  // --- выпадающий список услуг в шапке (десктоп) ---
+  const svcLink = [...document.querySelectorAll('.nav__links a')].find(a => /#services$/.test(a.getAttribute('href')));
+  if (svcLink) {
+    const dd = document.createElement('span'); dd.className = 'nav__dd';
+    svcLink.replaceWith(dd); dd.appendChild(svcLink);
+    svcLink.insertAdjacentHTML('beforeend', '<svg class="nav__caret" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.4"/></svg>');
+    dd.insertAdjacentHTML('beforeend', `<div class="nav__drop">${SVC.map(([k, t], i) =>
+      `<a href="${SITE_ROOT}services/${k}.html"${k === curSvc ? ' aria-current="page"' : ''}><b>0${i + 1}</b>${t}</a>`).join('')}</div>`);
+  }
+
+  // --- кнопка «Написать» в шапке на телефоне ---
+  const burger = document.querySelector('.nav__burger'), menu = document.getElementById('menu');
+  if (burger) burger.insertAdjacentHTML('beforebegin', `<a class="nav__wa mono" href="${waHref}" target="_blank" rel="noopener">${waIcon}Написать</a>`);
+
+  // --- мобильное меню: разделы, услуги, контакты ---
+  if (burger && menu) {
+    menu.setAttribute('data-lenis-prevent', '');
+    menu.innerHTML = `
+      <nav class="menu__main">
+        <a href="${isHome ? '#top' : SITE_ROOT + 'index.html'}">Главная</a>
+        <a href="${sec('reel')}">Шоурил</a>
+        <a href="${sec('services')}">Услуги</a>
+        <a href="${sec('works')}">Работы</a>
+        <a href="${sec('experience')}">Опыт</a>
+        <a href="#contact">Контакт</a>
+      </nav>
+      <div class="menu__label mono">Услуги</div>
+      <nav class="menu__svc">${SVC.map(([k, t], i) =>
+        `<a href="${SITE_ROOT}services/${k}.html"${k === curSvc ? ' aria-current="page"' : ''}><b class="mono">0${i + 1}</b>${t}</a>`).join('')}</nav>
+      <div class="menu__contact">
+        <a class="btn btn--wa" href="${waHref}" target="_blank" rel="noopener">${waIcon}Написать в WhatsApp</a>
+        <a class="btn" href="#contact" data-lead>Собрать бриф за 60 сек</a>
+        <a class="menu__tel mono" href="tel:${TEL}">+996 709 906 852</a>
+      </div>`;
+    const setMenu = o => {
+      menu.classList.toggle('is-open', o); burger.classList.toggle('is-open', o);
+      burger.setAttribute('aria-expanded', o); burger.setAttribute('aria-label', o ? 'Закрыть меню' : 'Меню');
+      document.documentElement.classList.toggle('menu-lock', o);
+      if (lenis) o ? lenis.stop() : lenis.start();
+      if (o) menu.scrollTop = 0;
+    };
+    burger.addEventListener('click', () => setMenu(!menu.classList.contains('is-open')));
+    menu.addEventListener('click', e => {
+      const a = e.target.closest('a'); if (!a) return;
+      const h = a.getAttribute('href');
+      setMenu(false);
+      if (h.startsWith('#') && !a.hasAttribute('data-lead')) { e.preventDefault(); go(h); }
+    });
+    addEventListener('keydown', e => { if (e.key === 'Escape' && menu.classList.contains('is-open')) setMenu(false); });
+    matchMedia('(min-width:1101px)').addEventListener('change', e => e.matches && setMenu(false));
+  }
+
+  // --- блок контактов: WhatsApp первым, бриф вторым, остальное следом ---
+  document.querySelectorAll('.cta .hero__btns').forEach(row => {
+    row.classList.add('contacts');
+    row.querySelectorAll('.btn--solid').forEach(b => { b.classList.remove('btn--solid'); b.querySelector('svg')?.remove(); });
+    const brief = row.querySelector('[data-lead]');
+    if (brief) brief.remove();
+    row.insertAdjacentHTML('afterbegin',
+      `<a class="btn btn--wa" href="${waHref}" target="_blank" rel="noopener">${waIcon}Написать в WhatsApp</a>` +
+      `<a class="btn btn--solid" href="#contact" data-lead>Собрать бриф за 60 сек</a>`);
+  });
+
+  // --- нижняя панель на телефоне: написать, бриф, наверх ---
+  const dock = document.createElement('div'); dock.className = 'dock';
+  dock.innerHTML = `<a class="dock__wa mono" href="${waHref}" target="_blank" rel="noopener">${waIcon}WhatsApp</a>
+    <a class="dock__brief mono" href="#contact" data-lead>Бриф за 60 сек</a>
+    <button class="dock__top" type="button" aria-label="Наверх"><svg viewBox="0 0 16 16" fill="none"><path d="M8 13V3M4 7l4-4 4 4" stroke="currentColor" stroke-width="1.5"/></svg></button>`;
+  document.body.appendChild(dock);
+  dock.querySelector('.dock__top').addEventListener('click', () => go('#top'));
+  const contact = document.getElementById('contact');
+  let contactSeen = false;
+  if (contact) new IntersectionObserver(([e]) => { contactSeen = e.isIntersecting; syncDock(); }, { threshold: .15 }).observe(contact);
+  const syncDock = () => dock.classList.toggle('is-on', scrollY > innerHeight * .6 && !contactSeen);
+  addEventListener('scroll', syncDock, { passive: true }); syncDock();
+})();
 
 // ---------- Видео в работах: data-video="media/file.mp4" ----------
 document.querySelectorAll('.work[data-video]').forEach(w => w.addEventListener('click', () => {
@@ -342,3 +432,51 @@ document.querySelectorAll('.work[data-video]').forEach(w => w.addEventListener('
   w.querySelector('.media').innerHTML = `<video src="${src}" autoplay controls playsinline></video>`;
   w.querySelector('.work__play')?.remove();
 }));
+
+// ---------- Шоурил: направления листаются сами, по клику переключаются ----------
+(() => {
+  const box = document.querySelector('.reel__box'); if (!box) return;
+  const items = [...box.querySelectorAll('.reel__item')], media = box.querySelector('.reel__media'), bg = box.querySelector('.reel__bg');
+  const nEl = box.querySelector('.reel__n'), tEl = box.querySelector('.reel__title'), dEl = box.querySelector('.reel__desc'), link = box.querySelector('.reel__link');
+  const DUR = 6000;
+  let cur = -1, timer = 0, visible = false, held = false;
+  const pad = n => String(n).padStart(2, '0');
+  const show = i => {
+    cur = (i + items.length) % items.length;
+    const it = items[cur], d = it.dataset, still = d.poster || d.src;
+    items.forEach((b, k) => { b.classList.toggle('is-on', k === cur); b.setAttribute('aria-selected', k === cur); });
+    bg.style.backgroundImage = `url("${still}")`;
+    const old = media.firstElementChild;
+    const el = document.createElement(d.type === 'video' ? 'video' : 'img');
+    if (d.type === 'video') { el.muted = true; el.loop = true; el.playsInline = true; el.setAttribute('playsinline', ''); el.poster = d.poster; el.src = d.src; }
+    else { el.src = d.src; el.alt = ''; el.decoding = 'async'; }
+    media.appendChild(el);
+    requestAnimationFrame(() => el.classList.add('is-in'));
+    if (old) { old.classList.remove('is-in'); setTimeout(() => old.remove(), 600); }
+    if (d.type === 'video' && visible) el.play().catch(() => {});
+    nEl.textContent = `${pad(cur + 1)} / ${pad(items.length)}`;
+    tEl.textContent = it.querySelector('strong').textContent;
+    dEl.textContent = it.querySelector('em').textContent;
+    link.href = d.href; link.firstChild.textContent = d.cta + ' ';
+    if (matchMedia('(max-width:760px)').matches) it.parentElement.scrollTo({ left: it.offsetLeft - 16, behavior: 'smooth' });
+    restart();
+  };
+  const restart = () => {
+    clearTimeout(timer); box.classList.remove('is-run');
+    if (reduce || !visible || held) return;
+    void box.offsetWidth; box.classList.add('is-run');
+    timer = setTimeout(() => show(cur + 1), DUR);
+  };
+  items.forEach((b, i) => b.addEventListener('click', () => show(i)));
+  const stage = box.querySelector('.reel__stage');
+  stage.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') { held = true; restart(); } });
+  stage.addEventListener('pointerleave', () => { if (held) { held = false; restart(); } });
+  new IntersectionObserver(([e]) => {
+    visible = e.isIntersecting;
+    const v = media.querySelector('video.is-in');
+    if (v) visible ? v.play().catch(() => {}) : v.pause();
+    restart();
+  }, { threshold: .3 }).observe(box);
+  box.style.setProperty('--reel-dur', DUR + 'ms');
+  show(0);
+})();
